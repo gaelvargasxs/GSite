@@ -367,9 +367,33 @@
   .modal-close-btn:hover{background:var(--accent-dark);}
 
   footer{text-align:center; padding:34px 20px; color:var(--text-muted); font-size:13px; border-top:1px solid var(--line); margin-top:20px;}
+
+  /* ---------- LOADING SCREEN ---------- */
+  #loadingScreen{
+    position:fixed; inset:0; z-index:9999;
+    background:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    transition:opacity 0.6s ease, visibility 0.6s ease;
+  }
+  #loadingScreen.hide{opacity:0; visibility:hidden; pointer-events:none;}
+  .loading-logo{
+    font-size:42px; font-weight:800;
+    color:var(--accent);
+    letter-spacing:-0.01em;
+    animation:loadingPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes loadingPulse{
+    0%, 100%{opacity:1; transform:scale(1);}
+    50%{opacity:0.5; transform:scale(0.97);}
+  }
 </style>
 </head>
 <body>
+
+<div id="loadingScreen">
+  <div class="loading-logo">GSite</div>
+</div>
+
 
 <header>
   <div class="header-left">
@@ -474,6 +498,18 @@
 
       <div class="schedule-note" id="scheduleNote"></div>
 
+      <div class="booking-section-label">TUS DATOS</div>
+      <div class="date-row">
+        <div class="date-field">
+          <label>NOMBRE</label>
+          <input type="text" id="clientName" placeholder="Tu nombre">
+        </div>
+        <div class="date-field">
+          <label>TELÉFONO</label>
+          <input type="tel" id="clientPhone" placeholder="10 dígitos">
+        </div>
+      </div>
+
       <div class="breakdown" id="breakdown">
         <div class="breakdown-row"><span>Entrada</span><span id="breakdownEntradaValue"></span></div>
         <div class="breakdown-row"><span>Salida estimada</span><span id="breakdownSalidaValue"></span></div>
@@ -495,12 +531,30 @@
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <div class="check-circle">✓</div>
-    <h3>¡Solicitud enviada!</h3>
-    <p>Tu solicitud de reserva fue registrada. El anfitrión confirmará la disponibilidad pronto.</p>
+    <h3>¡Fecha apartada!</h3>
+    <p>Tu reserva quedó registrada y el horario bloqueado para esa quinta. Te contactaremos para confirmar el pago.</p>
     <div class="modal-summary" id="modalSummary"></div>
     <button class="modal-close-btn" onclick="closeModal()">Entendido</button>
   </div>
 </div>
+
+<!-- Firebase (compat SDK, sin necesidad de build tools) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+  // TODO: reemplaza esto con la config real de tu proyecto de Firebase
+  // (la sacas en Firebase Console > Configuración del proyecto > tus apps)
+  const firebaseConfig = {
+    apiKey: "TU_API_KEY",
+    authDomain: "TU_PROYECTO.firebaseapp.com",
+    projectId: "TU_PROYECTO",
+    storageBucket: "TU_PROYECTO.appspot.com",
+    messagingSenderId: "TU_SENDER_ID",
+    appId: "TU_APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
 
 <script>
 function svgDataUri(svg){
@@ -920,6 +974,8 @@ function renderGallery(){
 function resetBookingForm(){
   document.getElementById("eventDate").value = "";
   document.getElementById("checkinTime").value = "";
+  document.getElementById("clientName").value = "";
+  document.getElementById("clientPhone").value = "";
   document.getElementById("breakdown").classList.remove("visible");
   document.getElementById("scheduleNote").classList.remove("visible");
   document.getElementById("errorMsg").classList.remove("visible");
@@ -970,12 +1026,20 @@ function updateBreakdown(){
   }
 }
 
-function handleReserve(){
+async function handleReserve(){
   const range = getExitDateTime();
   const errorEl = document.getElementById("errorMsg");
+  const clientName = document.getElementById("clientName").value.trim();
+  const clientPhone = document.getElementById("clientPhone").value.trim();
+  const reserveBtn = document.getElementById("reserveBtn");
 
   if (!range){
     errorEl.textContent = "Selecciona la fecha del evento y la hora de entrada.";
+    errorEl.classList.add("visible");
+    return;
+  }
+  if (!clientName || !clientPhone){
+    errorEl.textContent = "Escribe tu nombre y teléfono para apartar la fecha.";
     errorEl.classList.add("visible");
     return;
   }
@@ -983,17 +1047,65 @@ function handleReserve(){
   errorEl.classList.remove("visible");
   const { entry, exit } = range;
   const crossesDay = exit.getDate() !== entry.getDate() || exit.getMonth() !== entry.getMonth();
+  const dateVal = document.getElementById("eventDate").value;
+  const timeVal = document.getElementById("checkinTime").value;
 
-  document.getElementById("modalSummary").innerHTML = `
-    <div><span>Quinta</span><strong>${currentQuinta.name}</strong></div>
-    <div><span>Capacidad</span><strong>${currentQuinta.capacity} personas</strong></div>
-    <div><span>Fecha</span><strong>${formatDate(document.getElementById("eventDate").value)}</strong></div>
-    <div><span>Entrada</span><strong>${formatTime(entry)}</strong></div>
-    <div><span>Salida</span><strong>${formatTime(exit)}${crossesDay ? " (+1 día)" : ""}</strong></div>
-    <div><span>Duración</span><strong>${currentQuinta.hours} horas</strong></div>
-    <div><span>Total</span><strong>${money(currentQuinta.price)}</strong></div>
-  `;
-  document.getElementById("modalOverlay").classList.add("active");
+  reserveBtn.disabled = true;
+  reserveBtn.textContent = "Verificando disponibilidad...";
+
+  try {
+    // Un documento por quinta+fecha: si ya existe (y no está cancelado),
+    // esa quinta ya tiene evento ese día. runTransaction hace el
+    // "leer y luego escribir" de forma atómica para que dos personas
+    // no puedan apartar el mismo día al mismo tiempo.
+    const reservaId = `${currentQuinta.id}_${dateVal}`;
+    const reservaRef = db.collection("reservas").doc(reservaId);
+
+    await db.runTransaction(async (transaction) => {
+      const existing = await transaction.get(reservaRef);
+      if (existing.exists && existing.data().estado !== "cancelada"){
+        throw new Error("OCUPADO");
+      }
+      transaction.set(reservaRef, {
+        quintaId: currentQuinta.id,
+        quintaNombre: currentQuinta.name,
+        fecha: dateVal,
+        horaEntrada: timeVal,
+        horaSalida: formatTime(exit) + (crossesDay ? " (+1 día)" : ""),
+        horasRenta: currentQuinta.hours,
+        capacidad: currentQuinta.capacity,
+        total: currentQuinta.price,
+        estado: "pendiente_pago",
+        clienteNombre: clientName,
+        clienteTelefono: clientPhone,
+        creadaEn: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+
+    document.getElementById("modalSummary").innerHTML = `
+      <div><span>Quinta</span><strong>${currentQuinta.name}</strong></div>
+      <div><span>Capacidad</span><strong>${currentQuinta.capacity} personas</strong></div>
+      <div><span>Fecha</span><strong>${formatDate(dateVal)}</strong></div>
+      <div><span>Entrada</span><strong>${formatTime(entry)}</strong></div>
+      <div><span>Salida</span><strong>${formatTime(exit)}${crossesDay ? " (+1 día)" : ""}</strong></div>
+      <div><span>Duración</span><strong>${currentQuinta.hours} horas</strong></div>
+      <div><span>Total</span><strong>${money(currentQuinta.price)}</strong></div>
+    `;
+    document.getElementById("modalOverlay").classList.add("active");
+    resetBookingForm();
+
+  } catch (err){
+    if (err.message === "OCUPADO"){
+      errorEl.textContent = "Esa quinta ya tiene un evento reservado ese día. Elige otra fecha.";
+    } else {
+      console.error(err);
+      errorEl.textContent = "No se pudo guardar la reserva. Intenta de nuevo.";
+    }
+    errorEl.classList.add("visible");
+  } finally {
+    reserveBtn.disabled = false;
+    reserveBtn.textContent = "Reservar";
+  }
 }
 
 function formatDate(dateStr){
@@ -1008,6 +1120,13 @@ function formatTime(date){
 function closeModal(){
   document.getElementById("modalOverlay").classList.remove("active");
 }
+
+/* ---------------- LOADING SCREEN ---------------- */
+document.body.style.overflow = "hidden";
+setTimeout(() => {
+  document.getElementById("loadingScreen").classList.add("hide");
+  document.body.style.overflow = "";
+}, 2000);
 
 /* ---------------- INIT ---------------- */
 renderCategoryBar();
