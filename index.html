@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GSite | Renta de Quintas para Eventos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --text:#222222;
+    --text-muted:#717171;
+    --accent:#1B2A5E;
+    --accent-dark:#101A3D;
+    --line:#EBEBEB;
+    --line-strong:#DDDDDD;
+    --radius:12px;
+    --radius-full:999px;
+    --shadow-sm:0 6px 16px rgba(0,0,0,0.08);
+    --shadow-lg:0 10px 30px rgba(0,0,0,0.12);
+    --font:'Inter', -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:var(--font);
+    color:var(--text);
+    background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+  }
+  img{display:block; width:100%; object-fit:cover; background:#F2F2F2;}
+  button{font-family:inherit; cursor:pointer; border:none; background:none; transition:all 0.2s ease;}
+  a{text-decoration:none; color:inherit;}
+  input,select{font-family:inherit;}
+
+  /* ---------- HEADER ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(255,255,255,0.96);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+    padding:16px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .header-left{display:flex; align-items:center; gap:14px;}
+  .back-btn{
+    display:none;
+    align-items:center; gap:6px;
+    font-size:14px; font-weight:600;
+    color:var(--text);
+    padding:8px 12px;
+    border-radius:var(--radius-full);
+  }
+  .back-btn:hover{background:#F7F7F7;}
+  .back-btn.visible{display:flex;}
+  .logo{
+    font-size:22px; font-weight:800;
+    color:var(--accent);
+    cursor:pointer;
+  }
+  .header-actions{font-size:13px; font-weight:600; color:var(--text-muted);}
+
+  /* ---------- SEARCH PILL (Hero) ---------- */
+  .hero{padding:32px 24px 8px; display:flex; justify-content:center;}
+  .search-pill{
+    display:flex; align-items:stretch;
+    background:var(--bg);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius-full);
+    box-shadow:var(--shadow-sm);
+    overflow:hidden;
+    width:100%; max-width:680px;
+    transition:box-shadow 0.2s ease;
+  }
+  .search-pill:hover{box-shadow:var(--shadow-lg);}
+  .search-field{
+    flex:1;
+    display:flex; flex-direction:column; justify-content:center;
+    gap:2px;
+    padding:10px 26px;
+    min-width:0;
+  }
+  .search-field + .search-field{border-left:1px solid var(--line);}
+  .search-field label{font-size:11px; font-weight:700; color:var(--text);}
+  .search-field input{
+    border:none; outline:none; background:none;
+    font-size:13.5px; color:var(--text-muted); width:100%;
+  }
+  .search-field input::placeholder{color:var(--text-muted);}
+  .search-field .static-value{font-size:13.5px; color:var(--text-muted);}
+  .search-btn{
+    display:flex; align-items:center; justify-content:center;
+    width:48px; height:48px;
+    margin:6px;
+    flex-shrink:0;
+    background:var(--accent);
+    color:#fff;
+    border-radius:50%;
+    font-size:18px;
+  }
+  .search-btn:hover{background:var(--accent-dark); transform:scale(1.05);}
+  @media(max-width:640px){
+    .search-pill{flex-direction:column; border-radius:var(--radius);}
+    .search-field + .search-field{border-left:none; border-top:1px solid var(--line);}
+    .search-btn{width:100%; border-radius:var(--radius); margin:8px;}
+  }
+
+  /* ---------- CATEGORY BAR ---------- */
+  .category-bar{
+    display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
+    padding:20px 24px 8px;
+  }
+  .chip{
+    padding:9px 18px;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius-full);
+    font-size:13px; font-weight:600;
+    color:var(--text);
+  }
+  .chip:hover{border-color:var(--text);}
+  .chip.active{background:var(--text); border-color:var(--text); color:#fff;}
+
+  /* ---------- SUBHEADER ---------- */
+  .subheader{max-width:1400px; margin:0 auto; padding:20px 24px 4px;}
+  .subheader h1{font-size:26px; font-weight:800; letter-spacing:-0.01em;}
+  .subheader p{color:var(--text-muted); font-size:14.5px; margin-top:6px;}
+
+  /* ---------- CATALOG GRID ---------- */
+  .catalog{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:28px 24px;
+    padding:20px 24px 64px;
+    max-width:1400px;
+    margin:0 auto;
+  }
+  @media(min-width:640px){.catalog{grid-template-columns:repeat(2,1fr);}}
+  @media(min-width:960px){.catalog{grid-template-columns:repeat(3,1fr);}}
+  @media(min-width:1280px){.catalog{grid-template-columns:repeat(4,1fr);}}
+  .empty-state{padding:60px 24px; text-align:center; color:var(--text-muted); font-size:15px; grid-column:1/-1;}
+
+  .card{cursor:pointer;}
+  .card-img-wrap{
+    position:relative;
+    width:100%;
+    aspect-ratio:1/1;
+    overflow:hidden;
+    border-radius:var(--radius);
+    background:#F2F2F2;
+  }
+  .card-img-wrap img{width:100%; height:100%; transition:transform 0.2s ease;}
+  .card:hover .card-img-wrap img{transform:scale(1.05);}
+  .card:hover .card-img-wrap{box-shadow:var(--shadow-sm);}
+  .card-tag{
+    position:absolute; top:12px; left:12px;
+    background:#fff; color:var(--text);
+    font-size:12px; font-weight:700;
+    padding:6px 12px;
+    border-radius:var(--radius-full);
+  }
+  .fav-btn{
+    position:absolute; top:10px; right:10px;
+    width:32px; height:32px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+    background:rgba(0,0,0,0.2);
+    color:#fff;
+  }
+  .fav-btn:hover{transform:scale(1.12);}
+  .fav-btn.active{color:var(--accent);}
+
+  .card-body{padding-top:10px;}
+  .card-top-row{display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
+  .card-name{font-size:15px; font-weight:700; color:var(--text);}
+  .card-rating{display:flex; align-items:center; gap:4px; font-size:13.5px; font-weight:600; color:var(--text); flex-shrink:0;}
+  .card-location{color:var(--text-muted); font-size:13.5px; margin-top:2px;}
+  .card-capacity{color:var(--text-muted); font-size:13.5px;}
+  .card-price{margin-top:6px; font-size:14px; color:var(--text);}
+  .card-price strong{font-weight:700;}
+  .card-price .duration{color:var(--text-muted); font-weight:400;}
+
+  /* ---------- DETAIL VIEW ---------- */
+  .detail-view{display:none;}
+  .detail-view.active{display:block;}
+  .catalog-view.hidden{display:none;}
+
+  .detail-title-row{
+    max-width:1200px; margin:24px auto 0; padding:0 24px;
+    display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;
+  }
+  .detail-title-row h2{font-size:28px; font-weight:800; letter-spacing:-0.01em;}
+  .detail-meta{display:flex; align-items:center; gap:6px; margin-top:8px; font-size:14px; color:var(--text);}
+  .detail-meta .dot{color:var(--text-muted);}
+  .detail-meta .location{text-decoration:underline;}
+  .detail-fav-btn{
+    display:flex; align-items:center; gap:6px;
+    border:none; background:none;
+    text-decoration:underline;
+    font-size:14px; font-weight:600;
+    padding:8px 6px;
+  }
+
+  /* ---------- BENTO GALLERY (1 grande + 4 chicas) ---------- */
+  .gallery{max-width:1200px; margin:18px auto 0; padding:0 24px;}
+  .gallery-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:repeat(2, 1fr);
+    gap:8px;
+    height:460px;
+  }
+  .gallery-main-tile{
+    grid-row:1/3; grid-column:1;
+    border-radius:var(--radius) 0 0 var(--radius);
+  }
+  .gallery-side-grid{
+    grid-row:1/3; grid-column:2;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr;
+    gap:8px;
+  }
+  .gallery-side-grid img:nth-child(2){border-radius:0 var(--radius) 0 0;}
+  .gallery-side-grid img:nth-child(4){border-radius:0 0 var(--radius) 0;}
+  .gallery-grid img{width:100%; height:100%; cursor:pointer; transition:filter 0.2s ease;}
+  .gallery-grid img:hover{filter:brightness(0.92);}
+  @media(max-width:800px){
+    .gallery-grid{
+      display:flex; height:auto; aspect-ratio:4/3;
+      overflow-x:auto; scroll-snap-type:x mandatory; border-radius:var(--radius);
+    }
+    .gallery-side-grid{display:none;}
+    .gallery-main-tile{width:100%; height:100%; border-radius:var(--radius);}
+  }
+
+  /* ---------- DETAIL CONTENT (60/35) ---------- */
+  .detail-content{
+    max-width:1200px; margin:0 auto;
+    padding:32px 24px 70px;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:36px;
+  }
+  @media(min-width:900px){
+    .detail-content{grid-template-columns:60% 35%; justify-content:space-between; align-items:start;}
+  }
+
+  .host-line{display:flex; align-items:center; gap:12px; font-size:15px; color:var(--text); font-weight:600;}
+  .host-avatar{
+    width:44px; height:44px; border-radius:50%;
+    background:var(--accent); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:16px; flex-shrink:0;
+  }
+  .capacity-line{color:var(--text); font-size:15px; margin-top:4px;}
+  .detail-info hr{border:none; border-top:1px solid var(--line); margin:24px 0;}
+  .detail-info .desc{font-size:15.5px; line-height:1.7; color:var(--text);}
+  .amenities{display:grid; grid-template-columns:1fr 1fr; gap:16px 20px; margin-top:24px;}
+  .amenity{display:flex; align-items:center; gap:10px; font-size:14.5px; color:var(--text);}
+  .amenity .icon{font-size:18px;}
+
+  /* ---------- BOOKING PANEL (sticky) ---------- */
+  .booking-card{
+    background:var(--bg);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-lg);
+    padding:24px;
+    position:sticky; top:96px;
+  }
+  .booking-price{font-size:22px; font-weight:700; color:var(--text);}
+  .booking-price span{font-size:14px; font-weight:500; color:var(--text-muted);}
+
+  .badge-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
+  .info-badge{
+    display:inline-flex; align-items:center; gap:6px;
+    background:#F7F7F7;
+    color:var(--text);
+    padding:7px 12px;
+    border-radius:var(--radius-full);
+    font-size:13px; font-weight:600;
+  }
+
+  .booking-section-label{
+    font-size:11px; font-weight:700; letter-spacing:0.02em;
+    color:var(--text);
+    margin-top:22px; margin-bottom:8px;
+  }
+
+  .date-row{
+    display:flex;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .date-field{flex:1; display:flex; flex-direction:column; gap:2px; padding:10px 14px;}
+  .date-field + .date-field{border-left:1px solid var(--line-strong);}
+  .date-field label{font-size:10px; font-weight:700; color:var(--text);}
+  .date-field input, .date-field select{
+    background:none; border:none; padding:0;
+    font-size:14px; font-family:inherit; color:var(--text); width:100%;
+  }
+  .date-field input:focus, .date-field select:focus{outline:none;}
+
+  .schedule-note{
+    margin-top:14px; padding:14px;
+    background:#F7F7F7;
+    border-radius:var(--radius);
+    font-size:13px; color:var(--text); line-height:1.55;
+    display:none;
+  }
+  .schedule-note.visible{display:block;}
+  .schedule-note strong{color:var(--text);}
+
+  .reserve-btn{
+    width:100%; margin-top:20px;
+    background:var(--accent);
+    color:#fff;
+    font-size:16px; font-weight:700;
+    padding:15px;
+    border-radius:var(--radius);
+  }
+  .reserve-btn:hover{background:var(--accent-dark); transform:translateY(-1px);}
+  .reserve-note{text-align:center; margin-top:12px; font-size:12.5px; color:var(--text-muted);}
+
+  .error-msg{color:var(--accent-dark); font-size:13px; font-weight:600; margin-top:12px; display:none;}
+  .error-msg.visible{display:block;}
+
+  .breakdown{margin-top:20px; padding-top:18px; border-top:1px solid var(--line); font-size:14px; display:none;}
+  .breakdown.visible{display:block;}
+  .breakdown-row{display:flex; justify-content:space-between; margin-bottom:10px; color:var(--text-muted);}
+  .breakdown-row.total{
+    color:var(--text); font-weight:700; font-size:16px;
+    border-top:1px solid var(--line); padding-top:14px; margin-top:4px;
+  }
+
+  /* ---------- CONFIRMATION MODAL ---------- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,0.5); z-index:100;
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.active{display:flex;}
+  .modal{
+    background:var(--bg);
+    border-radius:var(--radius);
+    max-width:400px; width:100%;
+    padding:36px 30px; text-align:center;
+    box-shadow:var(--shadow-lg);
+    animation:popIn .2s ease;
+  }
+  @keyframes popIn{from{opacity:0; transform:scale(0.95);} to{opacity:1; transform:scale(1);}}
+  .modal .check-circle{
+    width:56px; height:56px; border-radius:50%;
+    background:rgba(27,42,94,0.1); color:var(--accent);
+    font-size:24px; display:flex; align-items:center; justify-content:center;
+    margin:0 auto 18px;
+  }
+  .modal h3{font-size:22px; font-weight:800; margin-bottom:10px;}
+  .modal p{font-size:14px; color:var(--text-muted); margin-bottom:20px; line-height:1.5;}
+  .modal-summary{background:#F7F7F7; border-radius:var(--radius); padding:16px 18px; text-align:left; font-size:14px; margin-bottom:22px;}
+  .modal-summary div{display:flex; justify-content:space-between; padding:5px 0; color:var(--text-muted);}
+  .modal-summary div strong{color:var(--text);}
+  .modal-close-btn{width:100%; background:var(--accent); color:#fff; font-weight:700; padding:14px; border-radius:var(--radius); font-size:15px;}
+  .modal-close-btn:hover{background:var(--accent-dark);}
+
+  footer{text-align:center; padding:34px 20px; color:var(--text-muted); font-size:13px; border-top:1px solid var(--line); margin-top:20px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <button class="back-btn" id="backBtn" onclick="showCatalog()">← <span>Volver</span></button>
+    <div class="logo" onclick="showCatalog()">GSite</div>
+  </div>
+  <div class="header-actions">Renta de Quintas</div>
+</header>
+
+<!-- ===================== CATALOG VIEW ===================== -->
+<div id="catalogView" class="catalog-view">
+  <div class="hero">
+    <div class="search-pill">
+      <div class="search-field">
+        <label>Destino</label>
+        <input type="text" id="searchLocation" placeholder="¿A dónde vas?">
+      </div>
+      <div class="search-field">
+        <label>Fechas</label>
+        <span class="static-value">Se elige por quinta</span>
+      </div>
+      <div class="search-field">
+        <label>Huéspedes</label>
+        <input type="number" id="searchGuests" placeholder="¿Cuántos son?" min="1">
+      </div>
+      <button class="search-btn" onclick="applyFilters()">🔍</button>
+    </div>
+  </div>
+
+  <div class="category-bar" id="categoryBar"></div>
+  <div style="text-align:center; padding:0 24px;">
+    <button id="clearFiltersBtn" onclick="clearFilters()" style="display:none; font-size:13px; font-weight:600; color:var(--text-muted); text-decoration:underline; padding:4px 10px;">Limpiar filtros ✕</button>
+  </div>
+
+  <div class="subheader">
+    <h1>Espacios con carácter para tu próxima celebración</h1>
+    <p>Quintas seleccionadas para bodas, XV años y eventos privados</p>
+  </div>
+
+  <div class="catalog" id="catalogGrid"></div>
+</div>
+
+<!-- ===================== DETAIL VIEW ===================== -->
+<div id="detailView" class="detail-view">
+  <div class="detail-title-row">
+    <div>
+      <h2 id="detailName"></h2>
+      <div class="detail-meta">
+        <span id="detailRating"></span>
+        <span class="dot">·</span>
+        <span class="location" id="detailLocation"></span>
+      </div>
+    </div>
+    <button class="detail-fav-btn" id="detailFavBtn" onclick="toggleFavorite(currentQuinta.id, event)">
+      <span id="detailFavIcon">🤍</span> Guardar
+    </button>
+  </div>
+
+  <div class="gallery">
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </div>
+
+  <div class="detail-content">
+    <div class="detail-info">
+      <div class="host-line">
+        <div class="host-avatar" id="hostAvatar"></div>
+        <span id="hostName"></span>
+      </div>
+      <div class="capacity-line" id="detailCapacity"></div>
+      <hr>
+      <p class="desc" id="detailDesc"></p>
+      <div class="amenities" id="detailAmenities"></div>
+    </div>
+
+    <div class="booking-card">
+      <div class="booking-price"><span id="bookingPriceValue"></span> <span id="bookingDurationLabel">/ evento</span></div>
+
+      <div class="badge-row">
+        <div class="info-badge" id="capacityBadge"></div>
+        <div class="info-badge" id="durationBadge"></div>
+      </div>
+
+      <div class="booking-section-label">FECHA Y HORA DE ENTRADA</div>
+      <div class="date-row">
+        <div class="date-field">
+          <label>FECHA</label>
+          <input type="date" id="eventDate">
+        </div>
+        <div class="date-field">
+          <label>ENTRADA</label>
+          <select id="checkinTime">
+            <option value="">Elige</option>
+            <option value="09:00">9:00 am</option>
+            <option value="10:00">10:00 am</option>
+            <option value="11:00">11:00 am</option>
+            <option value="12:00">12:00 pm</option>
+            <option value="13:00">1:00 pm</option>
+            <option value="14:00">2:00 pm</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="schedule-note" id="scheduleNote"></div>
+
+      <div class="breakdown" id="breakdown">
+        <div class="breakdown-row"><span>Entrada</span><span id="breakdownEntradaValue"></span></div>
+        <div class="breakdown-row"><span>Salida estimada</span><span id="breakdownSalidaValue"></span></div>
+        <div class="breakdown-row"><span>Capacidad</span><span id="breakdownCapValue"></span></div>
+        <div class="breakdown-row total"><span>Total</span><span id="breakdownTotalValue"></span></div>
+      </div>
+
+      <p class="error-msg" id="errorMsg"></p>
+
+      <button class="reserve-btn" id="reserveBtn" onclick="handleReserve()">Reservar</button>
+      <p class="reserve-note">No se te cobrará todavía</p>
+    </div>
+  </div>
+</div>
+
+<footer>GSite. Renta de quintas para eventos. MVP demo, 2026.</footer>
+
+<!-- ===================== CONFIRMATION MODAL ===================== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="check-circle">✓</div>
+    <h3>¡Solicitud enviada!</h3>
+    <p>Tu solicitud de reserva fue registrada. El anfitrión confirmará la disponibilidad pronto.</p>
+    <div class="modal-summary" id="modalSummary"></div>
+    <button class="modal-close-btn" onclick="closeModal()">Entendido</button>
+  </div>
+</div>
+
+<script>
+function svgDataUri(svg){
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+}
+function svgWrap(inner){
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900">${inner}</svg>`;
+}
+function skyRect(c1, c2){
+  const id = "sky" + Math.random().toString(36).slice(2,8);
+  return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="${c1}"/><stop offset="100%" stop-color="${c2}"/>
+  </linearGradient></defs><rect width="1200" height="900" fill="url(#${id})"/>`;
+}
+function moonGlow(cx, cy, color){
+  return `<circle cx="${cx}" cy="${cy}" r="130" fill="${color}" opacity="0.08"/><circle cx="${cx}" cy="${cy}" r="55" fill="${color}" opacity="0.9"/>`;
+}
+function stringLights(x1,y1,x2,y2,sag,color,count){
+  const midX = (x1+x2)/2, midY = Math.max(y1,y2)+sag;
+  let bulbs = "";
+  for(let i=0;i<=count;i++){
+    const t = i/count;
+    const x = (1-t)*(1-t)*x1 + 2*(1-t)*t*midX + t*t*x2;
+    const y = (1-t)*(1-t)*y1 + 2*(1-t)*t*midY + t*t*y2;
+    bulbs += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="7" fill="${color}"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="14" fill="${color}" opacity="0.25"/>`;
+  }
+  return `<path d="M${x1},${y1} Q${midX},${midY} ${x2},${y2}" stroke="#3a2f1a" stroke-width="2" fill="none" opacity="0.5"/>${bulbs}`;
+}
+function treeCanopy(cx, baseY, scale, canopy, fruit){
+  return `<rect x="${cx-6*scale}" y="${baseY-140*scale}" width="${12*scale}" height="${140*scale}" fill="#3b2a1a"/>
+    <circle cx="${cx}" cy="${baseY-175*scale}" r="${92*scale}" fill="${canopy}"/>
+    ${fruit ? `<circle cx="${cx-32*scale}" cy="${baseY-185*scale}" r="${8*scale}" fill="${fruit}"/>
+    <circle cx="${cx+36*scale}" cy="${baseY-155*scale}" r="${8*scale}" fill="${fruit}"/>
+    <circle cx="${cx+4*scale}" cy="${baseY-215*scale}" r="${8*scale}" fill="${fruit}"/>` : ""}`;
+}
+function poolShape(x,y,w,h,color,reflect){
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${h/2}" fill="${color}"/>
+    <rect x="${x+w*0.08}" y="${y+h*0.28}" width="${w*0.5}" height="${h*0.18}" rx="${h*0.09}" fill="${reflect}" opacity="0.5"/>`;
+}
+function archShape(x,y,w,h,color){
+  return `<path d="M${x},${y+h} L${x},${y+h*0.35} A${w/2},${w/2} 0 0 1 ${x+w},${y+h*0.35} L${x+w},${y+h} Z" fill="${color}"/>`;
+}
+function bougainvillea(cx,baseY){
+  return `<circle cx="${cx-30}" cy="${baseY-140}" r="42" fill="#e64a8c"/>
+    <circle cx="${cx+22}" cy="${baseY-165}" r="52" fill="#f06ea3"/>
+    <circle cx="${cx}" cy="${baseY-110}" r="46" fill="#d63d7c"/>`;
+}
+function fencePost(x,y){
+  return `<rect x="${x}" y="${y-90}" width="14" height="90" fill="#5a3d22"/>`;
+}
+
+function sceneGarden(p){
+  return svgWrap(`${skyRect(p.sky1,p.sky2)}${moonGlow(1080,120,'#fff3d6')}
+    <rect x="0" y="600" width="1200" height="300" fill="${p.ground}"/>
+    ${treeCanopy(120,620,1.15,p.foliage,'#ff8f3c')}
+    ${treeCanopy(1100,630,1.05,p.foliage,'#ff8f3c')}
+    <polygon points="530,340 670,340 600,220" fill="#8a5a34"/>
+    <rect x="545" y="340" width="14" height="150" fill="#6b4423"/>
+    <rect x="640" y="340" width="14" height="150" fill="#6b4423"/>
+    ${stringLights(180,260,1020,260,60,p.accent,9)}
+    ${poolShape(320,700,560,150,'#2f8fae','#8fe0f2')}`);
+}
+function sceneElegant(p){
+  return svgWrap(`${skyRect(p.sky1,p.sky2)}
+    <rect x="0" y="620" width="1200" height="280" fill="${p.ground}"/>
+    <rect x="140" y="180" width="920" height="460" fill="${p.wall}"/>
+    ${archShape(260,260,150,240,p.window)}
+    ${archShape(480,260,150,240,p.window)}
+    ${archShape(700,260,150,240,p.window)}
+    ${archShape(920,260,150,240,p.window)}
+    <ellipse cx="330" cy="760" rx="70" ry="18" fill="#000" opacity="0.25"/>
+    <circle cx="330" cy="700" r="46" fill="none" stroke="${p.accent}" stroke-width="3"/>
+    <rect x="326" y="700" width="8" height="55" fill="${p.accent}"/>
+    <ellipse cx="640" cy="760" rx="70" ry="18" fill="#000" opacity="0.25"/>
+    <circle cx="640" cy="700" r="46" fill="none" stroke="${p.accent}" stroke-width="3"/>
+    <rect x="636" y="700" width="8" height="55" fill="${p.accent}"/>
+    ${stringLights(150,180,1050,180,40,p.accent,10)}`);
+}
+function sceneRustic(p){
+  return svgWrap(`${skyRect(p.sky1,p.sky2)}
+    <circle cx="170" cy="170" r="70" fill="${p.sun}"/>
+    <path d="M0,560 Q300,490 600,550 T1200,530 L1200,900 L0,900 Z" fill="${p.hill1}"/>
+    <path d="M0,660 Q300,610 600,660 T1200,640 L1200,900 L0,900 Z" fill="${p.hill2}"/>
+    ${fencePost(190,660)}${fencePost(270,660)}${fencePost(350,660)}${fencePost(430,660)}
+    <rect x="180" y="612" width="270" height="10" fill="#5a3d22"/>
+    <ellipse cx="880" cy="770" rx="95" ry="20" fill="#000" opacity="0.3"/>
+    <polygon points="880,660 838,770 922,770" fill="#ff7a3c"/>
+    <polygon points="880,690 852,770 908,770" fill="#ffce54"/>
+    <circle cx="880" cy="720" r="130" fill="${p.accent}" opacity="0.15"/>`);
+}
+function sceneLuxury(p){
+  return svgWrap(`${skyRect(p.sky1,p.sky2)}
+    <rect x="0" y="620" width="1200" height="280" fill="${p.ground}"/>
+    <rect x="220" y="170" width="760" height="450" fill="${p.wall}"/>
+    ${archShape(430,220,340,400,p.accent)}
+    <rect x="300" y="170" width="30" height="450" fill="${p.col}"/>
+    <rect x="870" y="170" width="30" height="450" fill="${p.col}"/>
+    <line x1="600" y1="0" x2="600" y2="140" stroke="${p.accent}" stroke-width="3"/>
+    <circle cx="600" cy="150" r="14" fill="${p.accent}"/>
+    <line x1="560" y1="150" x2="520" y2="200" stroke="${p.accent}" stroke-width="2"/><circle cx="520" cy="200" r="7" fill="${p.accent}"/>
+    <line x1="640" y1="150" x2="680" y2="200" stroke="${p.accent}" stroke-width="2"/><circle cx="680" cy="200" r="7" fill="${p.accent}"/>
+    <rect x="560" y="640" width="80" height="260" fill="#7a1f2b"/>`);
+}
+function sceneFamily(p){
+  return svgWrap(`${skyRect(p.sky1,p.sky2)}
+    <rect x="0" y="600" width="1200" height="300" fill="${p.ground}"/>
+    ${bougainvillea(120,580)}${bougainvillea(1080,580)}
+    ${poolShape(400,720,400,120,'#4db8d6','#a9ecf7')}
+    <rect x="845" y="660" width="10" height="110" fill="#6b4423"/>
+    <polygon points="700,610 1000,610 850,500" fill="${p.accent}" opacity="0.85"/>
+    <rect x="800" y="700" width="100" height="16" fill="#8a5a34"/>
+    <rect x="810" y="716" width="10" height="40" fill="#6b4423"/><rect x="880" y="716" width="10" height="40" fill="#6b4423"/>`);
+}
+function sceneHacienda(p){
+  return svgWrap(`${skyRect(p.sky1,p.sky2)}
+    <rect x="0" y="640" width="1200" height="260" fill="${p.ground}"/>
+    <rect x="100" y="300" width="1000" height="380" fill="${p.wall}"/>
+    ${archShape(150,380,150,300,p.archColor)}
+    ${archShape(330,380,150,300,p.archColor)}
+    ${archShape(510,380,150,300,p.archColor)}
+    ${archShape(690,380,150,300,p.archColor)}
+    ${archShape(870,380,150,300,p.archColor)}
+    <rect x="1030" y="150" width="90" height="250" fill="${p.wall}"/>
+    <polygon points="1030,150 1120,150 1075,80" fill="${p.roof}"/>
+    <circle cx="1075" cy="200" r="14" fill="#2a1a10"/>
+    ${stringLights(150,340,1010,340,30,p.accent,10)}`);
+}
+
+function makeImages(sceneFn, palettes){
+  return palettes.map(p => svgDataUri(sceneFn(p)));
+}
+
+const gardenImgs = makeImages(sceneGarden, [
+  {sky1:'#bfe3f5', sky2:'#eaf6e8', ground:'#6fa860', foliage:'#4f8a4a', accent:'#ffd76b'},
+  {sky1:'#a9d8f0', sky2:'#f2f7e4', ground:'#79b168', foliage:'#5a9552', accent:'#ffcf5c'},
+  {sky1:'#cfeafb', sky2:'#fdf6e3', ground:'#6aa25b', foliage:'#4c8347', accent:'#ffd76b'}
+]);
+const elegantImgs = makeImages(sceneElegant, [
+  {sky1:'#dcecf7', sky2:'#fbf3e6', ground:'#e4d9c8', wall:'#f5ede1', window:'#c98a4a', accent:'#e8355a'},
+  {sky1:'#cfe6f5', sky2:'#fbeee0', ground:'#ded1bd', wall:'#f0e6d6', window:'#b97a3e', accent:'#e8355a'}
+]);
+const rusticImgs = makeImages(sceneRustic, [
+  {sky1:'#bfe0f2', sky2:'#fdf1d8', sun:'#ffd166', hill1:'#7fa25e', hill2:'#5c8546', accent:'#ffb627'},
+  {sky1:'#a9d4ec', sky2:'#fde4c7', sun:'#ffb347', hill1:'#88a865', hill2:'#658c4d', accent:'#ff9d4d'},
+  {sky1:'#cfe9f7', sky2:'#fff0d9', sun:'#ffdf91', hill1:'#769c54', hill2:'#547c3f', accent:'#ffcf5c'}
+]);
+const luxuryImgs = makeImages(sceneLuxury, [
+  {sky1:'#e7d9ea', sky2:'#fbeee6', ground:'#e3d6c8', wall:'#f4e9dc', col:'#caa15a', accent:'#e8355a'},
+  {sky1:'#ecdcf0', sky2:'#fcefe4', ground:'#e8dccf', wall:'#f6ede0', col:'#d1aa63', accent:'#e8355a'}
+]);
+const familyImgs = makeImages(sceneFamily, [
+  {sky1:'#bfe6f5', sky2:'#fbf1de', ground:'#78ac66', accent:'#ff9d4d'},
+  {sky1:'#d7ecf7', sky2:'#fdeee0', ground:'#82b56f', accent:'#ff7fa3'}
+]);
+const haciendaImgs = makeImages(sceneHacienda, [
+  {sky1:'#f3ddc0', sky2:'#fbf1de', ground:'#c9a878', wall:'#dcb98a', archColor:'#a8794a', roof:'#a8543a', accent:'#ffcf5c'},
+  {sky1:'#f6e6ca', sky2:'#fcf4e4', ground:'#c2a072', wall:'#d4ae7e', archColor:'#9c6f43', roof:'#994c33', accent:'#ffb84d'},
+  {sky1:'#eed6e6', sky2:'#faeee1', ground:'#bd9d70', wall:'#cfa878', archColor:'#93683f', roof:'#8f472f', accent:'#ffd76b'}
+]);
+
+const quintas = [
+  {
+    id: 1,
+    name: "Quinta Los Naranjos",
+    host: "Familia Ramírez",
+    category: ["jardin","alberca"],
+    location: "Lerdo, Durango",
+    price: 4500,
+    capacity: 50,
+    hours: 12,
+    rating: 4.9,
+    tag: "Popular",
+    description: "Amplio jardín con alberca, palapa techada y capacidad para grandes celebraciones. Ideal para bodas, XV años y eventos corporativos al aire libre.",
+    amenities: ["🏊 Alberca", "🎶 Sonido incluido", "🅿️ Estacionamiento", "🔥 Asador", "💡 Iluminación nocturna", "🚻 Baños dobles"],
+    images: gardenImgs
+  },
+  {
+    id: 2,
+    name: "Villa Esperanza",
+    host: "Anfitriona Lucía Torres",
+    category: ["salon"],
+    location: "Gómez Palacio, Dgo.",
+    price: 6200,
+    capacity: 40,
+    hours: 10,
+    rating: 4.8,
+    tag: "Nuevo",
+    description: "Salón techado con aire acondicionado, terraza exterior y cocina equipada. Perfecta para eventos formales durante todo el año.",
+    amenities: ["❄️ A/C", "🍽️ Cocina equipada", "🅿️ Estacionamiento amplio", "🎤 Área de DJ", "🌳 Jardín", "🛡️ Seguridad"],
+    images: elegantImgs
+  },
+  {
+    id: 3,
+    name: "Rancho El Mirador",
+    host: "Familia Delgado",
+    category: ["rustico"],
+    location: "Torreón, Coahuila",
+    price: 5800,
+    capacity: 30,
+    hours: 8,
+    rating: 4.7,
+    tag: "",
+    description: "Espacio rústico rodeado de naturaleza, ideal para eventos temáticos campiranos. Cuenta con área de juegos infantiles y fogatero.",
+    amenities: ["🐎 Área rústica", "👶 Juegos infantiles", "🔥 Fogatero", "🅿️ Estacionamiento", "🚻 Baños"],
+    images: rusticImgs
+  },
+  {
+    id: 4,
+    name: "Salón Cristal",
+    host: "Grupo Cristal Eventos",
+    category: ["salon"],
+    location: "Lerdo, Durango",
+    price: 7500,
+    capacity: 50,
+    hours: 12,
+    rating: 5.0,
+    tag: "Destacado",
+    description: "Salón de eventos de lujo con decoración elegante, capacidad para grupos grandes y servicio de valet parking disponible.",
+    amenities: ["💎 Decoración incluida", "🚗 Valet parking", "❄️ A/C", "🎶 Sonido profesional", "🍾 Barra de bebidas"],
+    images: luxuryImgs
+  },
+  {
+    id: 5,
+    name: "Quinta Bugambilias",
+    host: "Anfitriona Marisol Peña",
+    category: ["jardin","alberca"],
+    location: "Ciudad Lerdo, Dgo.",
+    price: 3900,
+    capacity: 20,
+    hours: 8,
+    rating: 4.6,
+    tag: "",
+    description: "Ambiente familiar con amplio patio, alberca chica para niños y zona de asadores. Excelente para reuniones familiares y cumpleaños.",
+    amenities: ["🏊 Alberca infantil", "🔥 Asadores", "🅿️ Estacionamiento", "🌳 Áreas verdes", "🚻 Baños"],
+    images: familyImgs
+  },
+  {
+    id: 6,
+    name: "Hacienda Santa Fe",
+    host: "Familia Santa Fe",
+    category: ["jardin","salon"],
+    location: "Durango, Dgo.",
+    price: 8900,
+    capacity: 50,
+    hours: 15,
+    rating: 4.9,
+    tag: "Premium",
+    description: "Hacienda histórica restaurada con jardines extensos, terraza panorámica y capacidad para eventos de gran escala.",
+    amenities: ["🏛️ Arquitectura histórica", "🌅 Terraza panorámica", "🅿️ Estacionamiento VIP", "🎉 Salón principal", "🍽️ Servicio de banquetes"],
+    images: haciendaImgs
+  }
+];
+let currentQuinta = null;
+let favorites = new Set();
+let activeCategory = "todas";
+
+const money = (n) => "$" + n.toLocaleString("es-MX") + " MXN";
+
+const categories = [
+  {key:"todas", label:"Todas"},
+  {key:"jardin", label:"Jardines"},
+  {key:"salon", label:"Salones techados"},
+  {key:"rustico", label:"Rústico"},
+  {key:"alberca", label:"Con alberca"}
+];
+
+/* ---------------- CATEGORY BAR ---------------- */
+function renderCategoryBar(){
+  const bar = document.getElementById("categoryBar");
+  bar.innerHTML = categories.map(c => `
+    <button class="chip ${c.key === activeCategory ? "active" : ""}" onclick="setCategory('${c.key}')">${c.label}</button>
+  `).join("");
+}
+
+function setCategory(key){
+  activeCategory = key;
+  renderCategoryBar();
+  renderCatalog();
+}
+
+function applyFilters(){
+  renderCatalog();
+}
+
+function clearFilters(){
+  document.getElementById("searchLocation").value = "";
+  document.getElementById("searchGuests").value = "";
+  activeCategory = "todas";
+  renderCategoryBar();
+  renderCatalog();
+}
+
+function updateClearFiltersVisibility(){
+  const hasFilters =
+    document.getElementById("searchLocation").value.trim() !== "" ||
+    document.getElementById("searchGuests").value.trim() !== "" ||
+    activeCategory !== "todas";
+  document.getElementById("clearFiltersBtn").style.display = hasFilters ? "inline-block" : "none";
+}
+
+document.getElementById("searchLocation").addEventListener("input", applyFilters);
+document.getElementById("searchGuests").addEventListener("input", applyFilters);
+
+function getFilteredQuintas(){
+  const locationQuery = document.getElementById("searchLocation").value.trim().toLowerCase();
+  const guestsQuery = parseInt(document.getElementById("searchGuests").value, 10);
+
+  return quintas.filter(q => {
+    if (activeCategory !== "todas" && !q.category.includes(activeCategory)) return false;
+    if (locationQuery && !q.location.toLowerCase().includes(locationQuery) && !q.name.toLowerCase().includes(locationQuery)) return false;
+    if (guestsQuery && !isNaN(guestsQuery) && q.capacity < guestsQuery) return false;
+    return true;
+  });
+}
+
+/* ---------------- FAVORITES ---------------- */
+function toggleFavorite(id, evt){
+  if (evt) evt.stopPropagation();
+  if (favorites.has(id)) favorites.delete(id);
+  else favorites.add(id);
+  renderCatalog();
+  if (currentQuinta && currentQuinta.id === id) updateFavIcon();
+}
+
+function updateFavIcon(){
+  document.getElementById("detailFavIcon").textContent = favorites.has(currentQuinta.id) ? "❤️" : "🤍";
+}
+
+/* ---------------- RENDER CATALOG ---------------- */
+function renderCatalog(){
+  updateClearFiltersVisibility();
+  const grid = document.getElementById("catalogGrid");
+  const list = getFilteredQuintas();
+
+  if (list.length === 0){
+    grid.innerHTML = `<div class="empty-state">No encontramos quintas con esos filtros. Prueba con otra búsqueda.</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(q => `
+    <div class="card" onclick="openDetail(${q.id})">
+      <div class="card-img-wrap">
+        <img src="${q.images[0]}" alt="${q.name}">
+        ${q.tag ? `<span class="card-tag">${q.tag}</span>` : ""}
+        <button class="fav-btn ${favorites.has(q.id) ? "active" : ""}" onclick="toggleFavorite(${q.id}, event)">${favorites.has(q.id) ? "❤️" : "🤍"}</button>
+      </div>
+      <div class="card-body">
+        <div class="card-top-row">
+          <div class="card-name">${q.name}</div>
+          <div class="card-rating">★ ${q.rating}</div>
+        </div>
+        <div class="card-location">${q.location}</div>
+        <div class="card-capacity">Hasta ${q.capacity} personas</div>
+        <div class="card-price"><strong>${money(q.price)}</strong> <span class="duration">/ evento (${q.hours} hrs)</span></div>
+      </div>
+    </div>
+  `).join("");
+}
+
+/* ---------------- VIEW SWITCHING ---------------- */
+function showCatalog(){
+  document.getElementById("catalogView").classList.remove("hidden");
+  document.getElementById("detailView").classList.remove("active");
+  document.getElementById("backBtn").classList.remove("visible");
+  window.scrollTo(0,0);
+}
+
+function openDetail(id){
+  currentQuinta = quintas.find(q => q.id === id);
+
+  document.getElementById("catalogView").classList.add("hidden");
+  document.getElementById("detailView").classList.add("active");
+  document.getElementById("backBtn").classList.add("visible");
+  window.scrollTo(0,0);
+
+  document.getElementById("detailName").textContent = currentQuinta.name;
+  document.getElementById("detailRating").textContent = "★ " + currentQuinta.rating;
+  document.getElementById("detailLocation").textContent = currentQuinta.location;
+  document.getElementById("detailCapacity").textContent = "👥 Capacidad máxima: " + currentQuinta.capacity + " personas";
+  document.getElementById("detailDesc").textContent = currentQuinta.description;
+  document.getElementById("bookingPriceValue").textContent = money(currentQuinta.price);
+  document.getElementById("capacityBadge").textContent = "👥 " + currentQuinta.capacity + " personas";
+  document.getElementById("durationBadge").textContent = "⏱️ Renta de " + currentQuinta.hours + " horas";
+  document.getElementById("hostName").textContent = "Anfitrión: " + currentQuinta.host;
+  document.getElementById("hostAvatar").textContent = currentQuinta.host.charAt(0);
+  updateFavIcon();
+
+  document.getElementById("detailAmenities").innerHTML = currentQuinta.amenities.map(a => {
+    const parts = a.split(" ");
+    const icon = parts[0];
+    const label = parts.slice(1).join(" ");
+    return `<div class="amenity"><span class="icon">${icon}</span><span>${label}</span></div>`;
+  }).join("");
+
+  renderGallery();
+  resetBookingForm();
+}
+
+/* ---------------- BENTO GALLERY (1 grande + 4 chicas) ---------------- */
+function renderGallery(){
+  const imgs = currentQuinta.images;
+  // Repetimos las fotos disponibles (2-3) para llenar las 5 celdas del bento grid
+  const tiles = [0,1,2,3,4].map(i => imgs[i % imgs.length]);
+
+  document.getElementById("galleryGrid").innerHTML = `
+    <img class="gallery-main-tile" src="${tiles[0]}" alt="${currentQuinta.name} - foto principal">
+    <div class="gallery-side-grid">
+      <img src="${tiles[1]}" alt="${currentQuinta.name} - foto 2">
+      <img src="${tiles[2]}" alt="${currentQuinta.name} - foto 3">
+      <img src="${tiles[3]}" alt="${currentQuinta.name} - foto 4">
+      <img src="${tiles[4]}" alt="${currentQuinta.name} - foto 5">
+    </div>
+  `;
+}
+
+/* ---------------- BOOKING FORM ---------------- */
+function resetBookingForm(){
+  document.getElementById("eventDate").value = "";
+  document.getElementById("checkinTime").value = "";
+  document.getElementById("breakdown").classList.remove("visible");
+  document.getElementById("scheduleNote").classList.remove("visible");
+  document.getElementById("errorMsg").classList.remove("visible");
+  document.getElementById("bookingDurationLabel").textContent = `/ evento (${currentQuinta.hours} hrs)`;
+
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("eventDate").min = today;
+}
+
+document.getElementById("eventDate").addEventListener("change", updateBreakdown);
+document.getElementById("checkinTime").addEventListener("change", updateBreakdown);
+
+/* La renta no es por noche, es por un bloque fijo de horas que
+   depende de cada quinta (currentQuinta.hours). A partir de la
+   fecha + hora de entrada calculamos la hora de salida. */
+function getExitDateTime(){
+  const dateVal = document.getElementById("eventDate").value;
+  const timeVal = document.getElementById("checkinTime").value;
+  if (!dateVal || !timeVal) return null;
+
+  const entry = new Date(dateVal + "T" + timeVal + ":00");
+  const exit = new Date(entry.getTime() + currentQuinta.hours * 60 * 60 * 1000);
+  return { entry, exit };
+}
+
+function updateBreakdown(){
+  const range = getExitDateTime();
+  const breakdownEl = document.getElementById("breakdown");
+  const noteEl = document.getElementById("scheduleNote");
+  const errorEl = document.getElementById("errorMsg");
+  errorEl.classList.remove("visible");
+
+  if (range){
+    const { entry, exit } = range;
+    const crossesDay = exit.getDate() !== entry.getDate() || exit.getMonth() !== entry.getMonth();
+
+    noteEl.innerHTML = `Entras el <strong>${formatDate(document.getElementById("eventDate").value)}</strong> a las <strong>${formatTime(entry)}</strong> y tendrías que salir a las <strong>${formatTime(exit)}</strong>${crossesDay ? " del día siguiente" : ""} (renta de ${currentQuinta.hours} horas).`;
+    noteEl.classList.add("visible");
+
+    document.getElementById("breakdownEntradaValue").textContent = `${formatDate(document.getElementById("eventDate").value)}, ${formatTime(entry)}`;
+    document.getElementById("breakdownSalidaValue").textContent = `${formatTime(exit)}${crossesDay ? " (+1 día)" : ""}`;
+    document.getElementById("breakdownCapValue").textContent = `${currentQuinta.capacity} personas`;
+    document.getElementById("breakdownTotalValue").textContent = money(currentQuinta.price);
+    breakdownEl.classList.add("visible");
+  } else {
+    breakdownEl.classList.remove("visible");
+    noteEl.classList.remove("visible");
+  }
+}
+
+function handleReserve(){
+  const range = getExitDateTime();
+  const errorEl = document.getElementById("errorMsg");
+
+  if (!range){
+    errorEl.textContent = "Selecciona la fecha del evento y la hora de entrada.";
+    errorEl.classList.add("visible");
+    return;
+  }
+
+  errorEl.classList.remove("visible");
+  const { entry, exit } = range;
+  const crossesDay = exit.getDate() !== entry.getDate() || exit.getMonth() !== entry.getMonth();
+
+  document.getElementById("modalSummary").innerHTML = `
+    <div><span>Quinta</span><strong>${currentQuinta.name}</strong></div>
+    <div><span>Capacidad</span><strong>${currentQuinta.capacity} personas</strong></div>
+    <div><span>Fecha</span><strong>${formatDate(document.getElementById("eventDate").value)}</strong></div>
+    <div><span>Entrada</span><strong>${formatTime(entry)}</strong></div>
+    <div><span>Salida</span><strong>${formatTime(exit)}${crossesDay ? " (+1 día)" : ""}</strong></div>
+    <div><span>Duración</span><strong>${currentQuinta.hours} horas</strong></div>
+    <div><span>Total</span><strong>${money(currentQuinta.price)}</strong></div>
+  `;
+  document.getElementById("modalOverlay").classList.add("active");
+}
+
+function formatDate(dateStr){
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function formatTime(date){
+  return date.toLocaleTimeString("es-MX", { hour: "numeric", minute: "2-digit", hour12: true });
+}
+
+function closeModal(){
+  document.getElementById("modalOverlay").classList.remove("active");
+}
+
+/* ---------------- INIT ---------------- */
+renderCategoryBar();
+renderCatalog();
+</script>
+
+</body>
+</html>
