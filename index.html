@@ -16,7 +16,7 @@
     --accent-dark:#101A3D;
     --line:#EBEBEB;
     --line-strong:#DDDDDD;
-    --radius:12px;
+    --radius:20px;
     --radius-full:999px;
     --shadow-sm:0 6px 16px rgba(0,0,0,0.08);
     --shadow-lg:0 10px 30px rgba(0,0,0,0.12);
@@ -58,6 +58,14 @@
     font-size:22px; font-weight:800;
     color:var(--accent);
     cursor:pointer;
+    display:flex; align-items:center; gap:8px;
+  }
+  .logo-tag{
+    font-size:11px; font-weight:700;
+    color:var(--accent);
+    background:#EEF1F8;
+    padding:3px 9px;
+    border-radius:var(--radius-full);
   }
   .header-actions{font-size:13px; font-weight:600; color:var(--text-muted);}
 
@@ -144,7 +152,7 @@
   .card-img-wrap{
     position:relative;
     width:100%;
-    aspect-ratio:1/1;
+    aspect-ratio:4/5;
     overflow:hidden;
     border-radius:var(--radius);
     background:#F2F2F2;
@@ -152,15 +160,19 @@
   .card-img-wrap img{width:100%; height:100%; transition:transform 0.2s ease;}
   .card:hover .card-img-wrap img{transform:scale(1.05);}
   .card:hover .card-img-wrap{box-shadow:var(--shadow-sm);}
+  .card-badges{
+    position:absolute; top:12px; left:12px; z-index:2;
+    display:flex; flex-direction:column; gap:6px; align-items:flex-start;
+  }
   .card-tag{
-    position:absolute; top:12px; left:12px;
     background:#fff; color:var(--text);
-    font-size:12px; font-weight:700;
+    font-size:11.5px; font-weight:700;
     padding:6px 12px;
     border-radius:var(--radius-full);
   }
+  .card-tag-deposit{background:var(--accent); color:#fff;}
   .fav-btn{
-    position:absolute; top:10px; right:10px;
+    position:absolute; top:10px; right:10px; z-index:2;
     width:32px; height:32px;
     border-radius:50%;
     display:flex; align-items:center; justify-content:center;
@@ -171,12 +183,28 @@
   .fav-btn:hover{transform:scale(1.12);}
   .fav-btn.active{color:var(--accent);}
 
+  .card-dots{
+    position:absolute; bottom:10px; left:0; right:0; z-index:2;
+    display:flex; justify-content:center; gap:5px;
+  }
+  .card-dots .dot{
+    width:5px; height:5px; border-radius:50%;
+    background:rgba(255,255,255,0.55);
+    transition:background 0.15s ease, transform 0.15s ease;
+  }
+  .card-dots .dot.active{background:#fff; transform:scale(1.3);}
+
   .card-body{padding-top:10px;}
   .card-top-row{display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
   .card-name{font-size:15px; font-weight:700; color:var(--text);}
   .card-rating{display:flex; align-items:center; gap:4px; font-size:13.5px; font-weight:600; color:var(--text); flex-shrink:0;}
-  .card-location{color:var(--text-muted); font-size:13.5px; margin-top:2px;}
-  .card-capacity{color:var(--text-muted); font-size:13.5px;}
+  .card-rating .count{color:var(--text-muted); font-weight:400;}
+  .card-location{color:var(--text-muted); font-size:13px; margin-top:3px;}
+  .card-capacity{color:var(--text-muted); font-size:13px; margin-top:1px;}
+  .card-turno{
+    color:var(--accent); font-size:13px; font-weight:600;
+    margin-top:5px;
+  }
   .card-price{margin-top:6px; font-size:14px; color:var(--text);}
   .card-price strong{font-weight:700;}
   .card-price .duration{color:var(--text-muted); font-weight:400;}
@@ -202,37 +230,49 @@
     padding:8px 6px;
   }
 
-  /* ---------- BENTO GALLERY (1 grande + 4 chicas) ---------- */
+  /* ---------- GALLERY (foto grande + miniaturas) ---------- */
   .gallery{max-width:1200px; margin:18px auto 0; padding:0 24px;}
-  .gallery-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    grid-template-rows:repeat(2, 1fr);
-    gap:8px;
-    height:460px;
+  .gallery-main-photo{
+    position:relative;
+    width:100%;
+    aspect-ratio:16/9;
+    overflow:hidden;
+    border-radius:28px;
+    background:#F2F2F2;
   }
-  .gallery-main-tile{
-    grid-row:1/3; grid-column:1;
-    border-radius:var(--radius) 0 0 var(--radius);
+  .gallery-main-photo img{width:100%; height:100%; transition:transform 0.3s ease;}
+  .photo-badge{
+    position:absolute; z-index:2;
+    background:rgba(255,255,255,0.94);
+    color:var(--text);
+    font-size:12px; font-weight:700;
+    padding:7px 13px;
+    border-radius:var(--radius-full);
   }
-  .gallery-side-grid{
-    grid-row:1/3; grid-column:2;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    grid-template-rows:1fr 1fr;
-    gap:8px;
+  .photo-badge-host{top:16px; left:16px;}
+  .photo-badge-capacity{bottom:16px; left:16px; background:rgba(0,0,0,0.55); color:#fff;}
+  .photo-counter{
+    position:absolute; bottom:16px; right:16px; z-index:2;
+    background:rgba(0,0,0,0.55); color:#fff;
+    font-size:12px; font-weight:600;
+    padding:6px 12px;
+    border-radius:var(--radius-full);
   }
-  .gallery-side-grid img:nth-child(2){border-radius:0 var(--radius) 0 0;}
-  .gallery-side-grid img:nth-child(4){border-radius:0 0 var(--radius) 0;}
-  .gallery-grid img{width:100%; height:100%; cursor:pointer; transition:filter 0.2s ease;}
-  .gallery-grid img:hover{filter:brightness(0.92);}
-  @media(max-width:800px){
-    .gallery-grid{
-      display:flex; height:auto; aspect-ratio:4/3;
-      overflow-x:auto; scroll-snap-type:x mandatory; border-radius:var(--radius);
-    }
-    .gallery-side-grid{display:none;}
-    .gallery-main-tile{width:100%; height:100%; border-radius:var(--radius);}
+  .gallery-thumbs{
+    display:flex; gap:10px; margin-top:12px;
+    overflow-x:auto;
+  }
+  .gallery-thumbs img{
+    width:88px; height:66px; flex-shrink:0;
+    border-radius:14px;
+    cursor:pointer;
+    opacity:0.55;
+    transition:opacity 0.2s ease, transform 0.2s ease;
+  }
+  .gallery-thumbs img:hover{opacity:0.85;}
+  .gallery-thumbs img.active{opacity:1; transform:scale(1.03);}
+  @media(max-width:700px){
+    .gallery-main-photo{aspect-ratio:4/3; border-radius:20px;}
   }
 
   /* ---------- DETAIL CONTENT (60/35) ---------- */
@@ -254,12 +294,40 @@
     display:flex; align-items:center; justify-content:center;
     font-weight:700; font-size:16px; flex-shrink:0;
   }
+  .host-sub{font-size:13px; color:var(--text-muted); font-weight:400; margin-top:2px;}
+  .verified-badge{color:var(--accent); font-weight:700;}
   .capacity-line{color:var(--text); font-size:15px; margin-top:4px;}
   .detail-info hr{border:none; border-top:1px solid var(--line); margin:24px 0;}
   .detail-info .desc{font-size:15.5px; line-height:1.7; color:var(--text);}
-  .amenities{display:grid; grid-template-columns:1fr 1fr; gap:16px 20px; margin-top:24px;}
+
+  .specs-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
+  .spec-pill{
+    background:#F7F7F7; color:var(--text);
+    font-size:12.5px; font-weight:600;
+    padding:7px 13px;
+    border-radius:var(--radius-full);
+  }
+
+  .section-title{font-size:16px; font-weight:800; margin-bottom:12px;}
+  .amenities-header{display:flex; justify-content:space-between; align-items:baseline; margin-top:24px;}
+  .amenities-count{font-size:13px; color:var(--text-muted); font-weight:600;}
+  .amenities{display:grid; grid-template-columns:1fr 1fr; gap:16px 20px; margin-top:16px;}
   .amenity{display:flex; align-items:center; gap:10px; font-size:14.5px; color:var(--text);}
   .amenity .icon{font-size:18px;}
+
+  .rules-box{
+    background:#F7F7F7;
+    border-radius:20px;
+    padding:18px 20px;
+  }
+  .rule-item{display:flex; gap:10px; font-size:13.5px; color:var(--text); line-height:1.5;}
+  .rule-item + .rule-item{margin-top:10px;}
+  .rule-item .icon{flex-shrink:0;}
+  .rules-note{font-size:11.5px; color:var(--text-muted); margin-top:12px; line-height:1.5;}
+
+  .location-note{font-size:14.5px; color:var(--text-muted); margin-bottom:14px;}
+  .map-embed{border-radius:20px; overflow:hidden; border:1px solid var(--line);}
+  .map-embed iframe{width:100%; height:220px; border:none; display:block;}
 
   /* ---------- BOOKING PANEL (sticky) ---------- */
   .booking-card{
@@ -291,23 +359,21 @@
 
   .date-row{
     display:flex;
-    border:1px solid var(--line-strong);
-    border-radius:var(--radius);
-    overflow:hidden;
+    gap:20px;
   }
-  .date-field{flex:1; display:flex; flex-direction:column; gap:2px; padding:10px 14px;}
-  .date-field + .date-field{border-left:1px solid var(--line-strong);}
-  .date-field label{font-size:10px; font-weight:700; color:var(--text);}
+  .date-field{flex:1; display:flex; flex-direction:column; gap:6px; padding:0;}
+  .date-field label{font-size:10px; font-weight:700; color:var(--text-muted); letter-spacing:0.03em; text-transform:uppercase;}
   .date-field input, .date-field select{
-    background:none; border:none; padding:0;
+    background:none; border:none; border-bottom:1.5px solid var(--line-strong); padding:0 0 8px;
     font-size:14px; font-family:inherit; color:var(--text); width:100%;
+    transition:border-color 0.2s ease;
   }
-  .date-field input:focus, .date-field select:focus{outline:none;}
+  .date-field input:focus, .date-field select:focus{outline:none; border-bottom-color:var(--accent);}
 
   .schedule-note{
-    margin-top:14px; padding:14px;
+    margin-top:16px; padding:14px 16px;
     background:#F7F7F7;
-    border-radius:var(--radius);
+    border-radius:16px;
     font-size:13px; color:var(--text); line-height:1.55;
     display:none;
   }
@@ -320,7 +386,7 @@
     color:#fff;
     font-size:16px; font-weight:700;
     padding:15px;
-    border-radius:var(--radius);
+    border-radius:var(--radius-full);
   }
   .reserve-btn:hover{background:var(--accent-dark); transform:translateY(-1px);}
   .reserve-note{text-align:center; margin-top:12px; font-size:12.5px; color:var(--text-muted);}
@@ -363,7 +429,7 @@
   .modal-summary{background:#F7F7F7; border-radius:var(--radius); padding:16px 18px; text-align:left; font-size:14px; margin-bottom:22px;}
   .modal-summary div{display:flex; justify-content:space-between; padding:5px 0; color:var(--text-muted);}
   .modal-summary div strong{color:var(--text);}
-  .modal-close-btn{width:100%; background:var(--accent); color:#fff; font-weight:700; padding:14px; border-radius:var(--radius); font-size:15px;}
+  .modal-close-btn{width:100%; background:var(--accent); color:#fff; font-weight:700; padding:14px; border-radius:var(--radius-full); font-size:15px;}
   .modal-close-btn:hover{background:var(--accent-dark);}
 
   footer{text-align:center; padding:34px 20px; color:var(--text-muted); font-size:13px; border-top:1px solid var(--line); margin-top:20px;}
@@ -398,7 +464,7 @@
 <header>
   <div class="header-left">
     <button class="back-btn" id="backBtn" onclick="showCatalog()">← <span>Volver</span></button>
-    <div class="logo" onclick="showCatalog()">GSite</div>
+    <div class="logo" onclick="showCatalog()">GSite <span class="logo-tag">Laguna</span></div>
   </div>
   <div class="header-actions">Renta de Quintas</div>
 </header>
@@ -453,19 +519,46 @@
   </div>
 
   <div class="gallery">
-    <div class="gallery-grid" id="galleryGrid"></div>
+    <div class="gallery-main-photo">
+      <img id="galleryMainImg" src="" alt="Foto principal de la quinta">
+      <span class="photo-badge photo-badge-host">✓ Anfitrión verificado</span>
+      <span class="photo-badge photo-badge-capacity" id="galleryCapacityBadge"></span>
+      <span class="photo-counter" id="galleryCounter"></span>
+    </div>
+    <div class="gallery-thumbs" id="galleryThumbs"></div>
   </div>
 
   <div class="detail-content">
     <div class="detail-info">
       <div class="host-line">
         <div class="host-avatar" id="hostAvatar"></div>
-        <span id="hostName"></span>
+        <div>
+          <div id="hostName"></div>
+          <div class="host-sub"><span class="verified-badge">✓</span> Anfitrión verificado · Responde en ~15 min</div>
+        </div>
       </div>
       <div class="capacity-line" id="detailCapacity"></div>
       <hr>
       <p class="desc" id="detailDesc"></p>
+      <div class="specs-row" id="detailSpecs"></div>
+
+      <div class="amenities-header">
+        <div class="section-title" style="margin-bottom:0;">Lo que ofrece este espacio</div>
+        <span class="amenities-count" id="amenitiesCount"></span>
+      </div>
       <div class="amenities" id="detailAmenities"></div>
+
+      <hr>
+      <div class="section-title">Reglas y normativa de <span id="rulesCity"></span></div>
+      <div class="rules-box">
+        <div id="detailRules"></div>
+        <p class="rules-note">Reglas de ejemplo — antes de publicar, confirma la normativa real de cada municipio y quinta.</p>
+      </div>
+
+      <hr>
+      <div class="section-title">Ubicación y accesos</div>
+      <p class="location-note" id="detailLocationNote"></p>
+      <div class="map-embed" id="detailMapEmbed"></div>
     </div>
 
     <div class="booking-card">
@@ -474,6 +567,7 @@
       <div class="badge-row">
         <div class="info-badge" id="capacityBadge"></div>
         <div class="info-badge" id="durationBadge"></div>
+        <div class="info-badge" id="depositBadge">💳 Aparta con 50%</div>
       </div>
 
       <div class="booking-section-label">FECHA Y HORA DE ENTRADA</div>
@@ -719,6 +813,9 @@ const quintas = [
   {
     id: 1,
     name: "Quinta Los Naranjos",
+    reviewCount: 38,
+    reference: "a 6 min del Periférico, cerca del centro de Lerdo",
+    specs: ["Alberca con chapoteadero", "Palapa techada 90m²", "Jardín empastado 300m²", "Circuito cerrado 24/7"],
     host: "Familia Ramírez",
     category: ["jardin","alberca"],
     location: "Lerdo, Durango",
@@ -734,6 +831,9 @@ const quintas = [
   {
     id: 2,
     name: "Villa Esperanza",
+    reviewCount: 52,
+    reference: "zona residencial, a 10 min del centro de Gómez Palacio",
+    specs: ["Salón con A/C 20T", "Terraza cubierta 60m²", "Cocina equipada completa", "Estacionamiento techado"],
     host: "Anfitriona Lucía Torres",
     category: ["salon"],
     location: "Gómez Palacio, Dgo.",
@@ -749,6 +849,9 @@ const quintas = [
   {
     id: 3,
     name: "Rancho El Mirador",
+    reviewCount: 24,
+    reference: "zona rural, a 15 min del Periférico de Torreón",
+    specs: ["Terreno campirano 1,500m²", "Fogatero de piedra", "Corral y área de juegos", "Circuito cerrado"],
     host: "Familia Delgado",
     category: ["rustico"],
     location: "Torreón, Coahuila",
@@ -764,6 +867,9 @@ const quintas = [
   {
     id: 4,
     name: "Salón Cristal",
+    reviewCount: 71,
+    reference: "zona centro, a 5 min de la Plaza Principal de Lerdo",
+    specs: ["Salón climatizado 25T", "Pista de baile iluminada", "Barra de bebidas incluida", "Valet parking"],
     host: "Grupo Cristal Eventos",
     category: ["salon"],
     location: "Lerdo, Durango",
@@ -779,6 +885,9 @@ const quintas = [
   {
     id: 5,
     name: "Quinta Bugambilias",
+    reviewCount: 19,
+    reference: "colonia familiar, a 8 min del centro de Cd. Lerdo",
+    specs: ["Alberca infantil con chapoteadero", "Palapa chica 40m²", "Jardín 200m²", "Asadores techados"],
     host: "Anfitriona Marisol Peña",
     category: ["jardin","alberca"],
     location: "Ciudad Lerdo, Dgo.",
@@ -794,6 +903,9 @@ const quintas = [
   {
     id: 6,
     name: "Hacienda Santa Fe",
+    reviewCount: 45,
+    reference: "zona de haciendas históricas, a 20 min del centro de Durango",
+    specs: ["Construcción de cantera s. XIX", "Terraza panorámica 150m²", "Jardines de 2,000m²", "Salón principal con candiles"],
     host: "Familia Santa Fe",
     category: ["jardin","salon"],
     location: "Durango, Dgo.",
@@ -808,6 +920,7 @@ const quintas = [
   }
 ];
 let currentQuinta = null;
+let currentImageIndex = 0;
 let favorites = new Set();
 let activeCategory = "todas";
 
@@ -818,7 +931,9 @@ const categories = [
   {key:"jardin", label:"Jardines"},
   {key:"salon", label:"Salones techados"},
   {key:"rustico", label:"Rústico"},
-  {key:"alberca", label:"Con alberca"}
+  {key:"alberca", label:"Con alberca"},
+  {key:"turno-diurno", label:"Turno diurno (≤10 hrs)"},
+  {key:"turno-completo", label:"Turno completo (12+ hrs)"}
 ];
 
 /* ---------------- CATEGORY BAR ---------------- */
@@ -863,7 +978,9 @@ function getFilteredQuintas(){
   const guestsQuery = parseInt(document.getElementById("searchGuests").value, 10);
 
   return quintas.filter(q => {
-    if (activeCategory !== "todas" && !q.category.includes(activeCategory)) return false;
+    if (activeCategory === "turno-diurno" && q.hours > 10) return false;
+    if (activeCategory === "turno-completo" && q.hours < 12) return false;
+    if (!["todas","turno-diurno","turno-completo"].includes(activeCategory) && !q.category.includes(activeCategory)) return false;
     if (locationQuery && !q.location.toLowerCase().includes(locationQuery) && !q.name.toLowerCase().includes(locationQuery)) return false;
     if (guestsQuery && !isNaN(guestsQuery) && q.capacity < guestsQuery) return false;
     return true;
@@ -894,24 +1011,43 @@ function renderCatalog(){
     return;
   }
 
-  grid.innerHTML = list.map(q => `
+  grid.innerHTML = list.map(q => {
+    const highlightAmenity = q.amenities[0].split(" ").slice(1).join(" ");
+    return `
     <div class="card" onclick="openDetail(${q.id})">
       <div class="card-img-wrap">
-        <img src="${q.images[0]}" alt="${q.name}">
-        ${q.tag ? `<span class="card-tag">${q.tag}</span>` : ""}
+        <img id="cardImg-${q.id}" src="${q.images[0]}" alt="${q.name}">
+        <div class="card-badges">
+          ${q.tag ? `<span class="card-tag">${q.tag}</span>` : ""}
+          <span class="card-tag card-tag-deposit">Aparta con 50%</span>
+        </div>
         <button class="fav-btn ${favorites.has(q.id) ? "active" : ""}" onclick="toggleFavorite(${q.id}, event)">${favorites.has(q.id) ? "❤️" : "🤍"}</button>
+        ${q.images.length > 1 ? `
+          <div class="card-dots">
+            ${q.images.map((img, i) => `<span class="dot ${i === 0 ? "active" : ""}" onclick="setCardImage(event, ${q.id}, ${i})"></span>`).join("")}
+          </div>` : ""}
       </div>
       <div class="card-body">
         <div class="card-top-row">
           <div class="card-name">${q.name}</div>
-          <div class="card-rating">★ ${q.rating}</div>
+          <div class="card-rating">★ ${q.rating} <span class="count">(${q.reviewCount})</span></div>
         </div>
-        <div class="card-location">${q.location}</div>
-        <div class="card-capacity">Hasta ${q.capacity} personas</div>
-        <div class="card-price"><strong>${money(q.price)}</strong> <span class="duration">/ evento (${q.hours} hrs)</span></div>
+        <div class="card-location">${q.location} · ${q.reference}</div>
+        <div class="card-capacity">Hasta ${q.capacity} personas · ${highlightAmenity}</div>
+        <div class="card-turno">Turno de ${q.hours} horas</div>
+        <div class="card-price"><strong>${money(q.price)}</strong> <span class="duration">/ evento</span></div>
       </div>
     </div>
-  `).join("");
+  `;
+  }).join("");
+}
+
+function setCardImage(evt, quintaId, index){
+  evt.stopPropagation();
+  const q = quintas.find(item => item.id === quintaId);
+  document.getElementById(`cardImg-${quintaId}`).src = q.images[index];
+  const dotsContainer = evt.currentTarget.parentElement;
+  dotsContainer.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === index));
 }
 
 /* ---------------- VIEW SWITCHING ---------------- */
@@ -920,6 +1056,55 @@ function showCatalog(){
   document.getElementById("detailView").classList.remove("active");
   document.getElementById("backBtn").classList.remove("visible");
   window.scrollTo(0,0);
+}
+
+/* Reglas de ejemplo por ciudad — placeholder, hay que verificar
+   la normativa real de cada municipio antes de publicar. */
+function getLocalRules(location){
+  const loc = location.toLowerCase();
+  if (loc.includes("gómez palacio") || loc.includes("gomez palacio")){
+    return {
+      city: "Gómez Palacio",
+      lat: 25.5717, lng: -103.4936,
+      rules: [
+        "⏰ Horario límite de desalojo: 12:00 AM",
+        "🎶 Música con volumen moderado permitida hasta las 11:00 PM",
+        "🎆 Pirotecnia y fuegos artificiales no permitidos"
+      ]
+    };
+  }
+  if (loc.includes("torreón") || loc.includes("torreon")){
+    return {
+      city: "Torreón",
+      lat: 25.5428, lng: -103.4068,
+      rules: [
+        "⏰ Horario límite de desalojo: 11:00 PM entre semana, 12:00 AM fines de semana",
+        "🎶 Grupo en vivo o sonido permitido hasta las 10:30 PM",
+        "🎆 No se permite el uso de pirotecnia"
+      ]
+    };
+  }
+  if (loc.includes("durango")){
+    return {
+      city: "Durango",
+      lat: 24.0277, lng: -104.6532,
+      rules: [
+        "⏰ Horario límite de desalojo: 11:30 PM",
+        "🎶 Música en vivo permitida con moderación hasta las 10:30 PM",
+        "🎆 Pirotecnia estrictamente prohibida"
+      ]
+    };
+  }
+  // Lerdo / Ciudad Lerdo (default de la región)
+  return {
+    city: "Lerdo",
+    lat: 25.5432, lng: -103.5307,
+    rules: [
+      "⏰ Horario límite de desalojo: 11:30 PM (recomendación de Protección Civil local)",
+      "🎶 Música en vivo o banda permitida con volumen moderado hasta las 10:30 PM",
+      "🎆 Uso de cuetes o pirotecnia no permitido dentro del predio"
+    ]
+  };
 }
 
 function openDetail(id){
@@ -931,16 +1116,19 @@ function openDetail(id){
   window.scrollTo(0,0);
 
   document.getElementById("detailName").textContent = currentQuinta.name;
-  document.getElementById("detailRating").textContent = "★ " + currentQuinta.rating;
-  document.getElementById("detailLocation").textContent = currentQuinta.location;
+  document.getElementById("detailRating").textContent = `★ ${currentQuinta.rating} (${currentQuinta.reviewCount} reseñas)`;
+  document.getElementById("detailLocation").textContent = `${currentQuinta.location} · ${currentQuinta.reference}`;
   document.getElementById("detailCapacity").textContent = "👥 Capacidad máxima: " + currentQuinta.capacity + " personas";
   document.getElementById("detailDesc").textContent = currentQuinta.description;
   document.getElementById("bookingPriceValue").textContent = money(currentQuinta.price);
   document.getElementById("capacityBadge").textContent = "👥 " + currentQuinta.capacity + " personas";
   document.getElementById("durationBadge").textContent = "⏱️ Renta de " + currentQuinta.hours + " horas";
-  document.getElementById("hostName").textContent = "Anfitrión: " + currentQuinta.host;
+  document.getElementById("hostName").textContent = currentQuinta.host;
   document.getElementById("hostAvatar").textContent = currentQuinta.host.charAt(0);
+  document.getElementById("galleryCapacityBadge").textContent = "Capacidad: " + currentQuinta.capacity + " personas";
   updateFavIcon();
+
+  document.getElementById("detailSpecs").innerHTML = currentQuinta.specs.map(s => `<span class="spec-pill">${s}</span>`).join("");
 
   document.getElementById("detailAmenities").innerHTML = currentQuinta.amenities.map(a => {
     const parts = a.split(" ");
@@ -948,26 +1136,38 @@ function openDetail(id){
     const label = parts.slice(1).join(" ");
     return `<div class="amenity"><span class="icon">${icon}</span><span>${label}</span></div>`;
   }).join("");
+  document.getElementById("amenitiesCount").textContent = `${currentQuinta.amenities.length} esenciales`;
+
+  const localInfo = getLocalRules(currentQuinta.location);
+  document.getElementById("rulesCity").textContent = localInfo.city;
+  document.getElementById("detailRules").innerHTML = localInfo.rules.map(r => `<div class="rule-item">${r}</div>`).join("");
+
+  document.getElementById("detailLocationNote").textContent = `Ubicada en ${currentQuinta.location}, ${currentQuinta.reference}.`;
+  document.getElementById("detailMapEmbed").innerHTML = `<iframe loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=${localInfo.lng-0.08}%2C${localInfo.lat-0.06}%2C${localInfo.lng+0.08}%2C${localInfo.lat+0.06}&layer=mapnik&marker=${localInfo.lat}%2C${localInfo.lng}" title="Ubicación aproximada de ${currentQuinta.name}"></iframe>`;
 
   renderGallery();
   resetBookingForm();
 }
 
-/* ---------------- BENTO GALLERY (1 grande + 4 chicas) ---------------- */
+/* ---------------- GALLERY (foto grande + miniaturas) ---------------- */
 function renderGallery(){
+  currentImageIndex = 0;
   const imgs = currentQuinta.images;
-  // Repetimos las fotos disponibles (2-3) para llenar las 5 celdas del bento grid
-  const tiles = [0,1,2,3,4].map(i => imgs[i % imgs.length]);
 
-  document.getElementById("galleryGrid").innerHTML = `
-    <img class="gallery-main-tile" src="${tiles[0]}" alt="${currentQuinta.name} - foto principal">
-    <div class="gallery-side-grid">
-      <img src="${tiles[1]}" alt="${currentQuinta.name} - foto 2">
-      <img src="${tiles[2]}" alt="${currentQuinta.name} - foto 3">
-      <img src="${tiles[3]}" alt="${currentQuinta.name} - foto 4">
-      <img src="${tiles[4]}" alt="${currentQuinta.name} - foto 5">
-    </div>
-  `;
+  document.getElementById("galleryMainImg").src = imgs[currentImageIndex];
+  document.getElementById("galleryCounter").textContent = `${currentImageIndex + 1} / ${imgs.length} fotos`;
+  document.getElementById("galleryThumbs").innerHTML = imgs.map((img, i) =>
+    `<img src="${img}" class="${i === currentImageIndex ? "active" : ""}" onclick="setGalleryImage(${i})" alt="${currentQuinta.name} - foto ${i+1}">`
+  ).join("");
+}
+
+function setGalleryImage(i){
+  currentImageIndex = i;
+  document.getElementById("galleryMainImg").src = currentQuinta.images[i];
+  document.getElementById("galleryCounter").textContent = `${i + 1} / ${currentQuinta.images.length} fotos`;
+  document.querySelectorAll(".gallery-thumbs img").forEach((el, idx) => {
+    el.classList.toggle("active", idx === i);
+  });
 }
 
 /* ---------------- BOOKING FORM ---------------- */
