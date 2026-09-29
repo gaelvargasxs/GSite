@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
   :root{
     --bg:#FFFFFF;
@@ -79,7 +80,6 @@
     border:1px solid var(--line-strong);
     border-radius:var(--radius-full);
     box-shadow:var(--shadow-sm);
-    overflow:hidden;
     width:100%; max-width:680px;
     transition:box-shadow 0.2s ease;
   }
@@ -99,6 +99,28 @@
   }
   .search-field input::placeholder{color:var(--text-muted);}
   .search-field .static-value{font-size:13.5px; color:var(--text-muted);}
+  
+  .custom-select {
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:13.5px; color:var(--text-muted); cursor:pointer;
+    user-select:none;
+  }
+  .custom-select .arrow { font-size:10px; }
+  .custom-dropdown {
+    display:none; position:absolute; top:100%; left:0; right:0; z-index:100;
+    background:#fff; border-radius:16px; box-shadow:var(--shadow-lg);
+    margin-top:12px; padding:8px 0; border: 1px solid var(--line);
+    user-select:none;
+  }
+  .custom-dropdown.show { display:block; animation: popIn 0.2s ease; }
+  .custom-dropdown div {
+    padding:10px 20px; font-size:14px; color:var(--text); cursor:pointer;
+    transition:background 0.2s ease;
+  }
+  .custom-dropdown div:hover { background:#F7F7F7; }
+  
+  .flatpickr-calendar { border-radius: 16px !important; border: 1px solid var(--line) !important; box-shadow: var(--shadow-lg) !important; padding: 8px !important; }
+
   .search-btn{
     display:flex; align-items:center; justify-content:center;
     width:48px; height:48px;
@@ -505,17 +527,22 @@
         <label>Fechas</label>
         <input type="date" id="searchDate" style="border:none; outline:none; background:none; font-size:13.5px; color:var(--text-muted); width:100%; cursor:pointer; padding:0;">
       </div>
-      <div class="search-field">
-        <label>Personas</label>
-        <select id="searchGuests" style="border:none; outline:none; background:none; font-size:13.5px; color:var(--text-muted); width:100%; cursor:pointer; padding:0;">
-          <option value="">¿Cuántos son?</option>
-          <option value="10">10 personas</option>
-          <option value="15">15 personas</option>
-          <option value="20">20 personas</option>
-          <option value="30">30 personas</option>
-          <option value="40">40 personas</option>
-          <option value="50">50+ personas</option>
-        </select>
+      <div class="search-field" id="guestsDropdownContainer" style="position:relative; cursor:pointer;" onclick="document.getElementById('guestsDropdown').classList.toggle('show')">
+        <label style="cursor:pointer;">Personas</label>
+        <div class="custom-select">
+          <span id="guestsLabel">¿Cuántos son?</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="custom-dropdown" id="guestsDropdown">
+          <div onclick="selectGuests(event, '', '¿Cuántos son?')">¿Cuántos son?</div>
+          <div onclick="selectGuests(event, '10', '10 personas')">10 personas</div>
+          <div onclick="selectGuests(event, '15', '15 personas')">15 personas</div>
+          <div onclick="selectGuests(event, '20', '20 personas')">20 personas</div>
+          <div onclick="selectGuests(event, '30', '30 personas')">30 personas</div>
+          <div onclick="selectGuests(event, '40', '40 personas')">40 personas</div>
+          <div onclick="selectGuests(event, '50', '50+ personas')">50+ personas</div>
+        </div>
+        <input type="hidden" id="searchGuests" value="">
       </div>
       <button class="search-btn" onclick="applyFilters()">🔍</button>
     </div>
@@ -981,6 +1008,8 @@ function setCategory(key){
   document.getElementById("searchLocation").value = "";
   document.getElementById("searchGuests").value = "";
   if (document.getElementById("searchDate")) document.getElementById("searchDate").value = "";
+  const gl = document.getElementById("guestsLabel");
+  if(gl) gl.textContent = "¿Cuántos son?";
   
   activeCategory = key;
   renderCategoryBar();
@@ -995,6 +1024,9 @@ function clearFilters(){
   document.getElementById("searchLocation").value = "";
   document.getElementById("searchGuests").value = "";
   if (document.getElementById("searchDate")) document.getElementById("searchDate").value = "";
+  const gl = document.getElementById("guestsLabel");
+  if(gl) gl.textContent = "¿Cuántos son?";
+  
   activeCategory = "todas";
   renderCategoryBar();
   renderCatalog();
@@ -1417,9 +1449,29 @@ setTimeout(() => {
   document.body.style.overflow = "";
 }, 2000);
 
+/* ---------------- CUSTOM UI LOGIC ---------------- */
+function selectGuests(e, val, label){
+  e.stopPropagation();
+  document.getElementById('searchGuests').value = val;
+  document.getElementById('guestsLabel').textContent = label;
+  document.getElementById('guestsDropdown').classList.remove('show');
+}
+document.addEventListener('click', function(e){
+  if(!e.target.closest('#guestsDropdownContainer')) {
+    const d = document.getElementById('guestsDropdown');
+    if(d) d.classList.remove('show');
+  }
+});
+
 /* ---------------- INIT ---------------- */
 renderCategoryBar();
 renderCatalog();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+<script>
+  flatpickr("#searchDate", { locale: "es", minDate: "today", dateFormat: "Y-m-d" });
+  flatpickr("#eventDate", { locale: "es", minDate: "today", dateFormat: "Y-m-d" });
 </script>
 
 </body>
