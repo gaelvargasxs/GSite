@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detalles de la Quinta | GSite</title>
+<meta name="description" content="GSite: renta de quintas por d&iacute;a en La Laguna. Aparta tu fecha con solo el 10%.">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body style="background:var(--surface);">
+<div id="loadingScreen">
+  <div class="loading-logo">
+    <img src="img/logo-large.png" alt="GSite Logo">
+    <span>GSite</span>
+  </div>
+  <div class="loading-bar"></div>
+</div>
+
+<!-- ===================== HEADER ===================== -->
+<header class="site-header">
+  <div class="container header-inner">
+    <div style="display:flex; align-items:center; gap:var(--space-md);">
+      <a class="back-btn" href="index.html" style="display:inline-flex;">
+        <span class="ms">arrow_back</span><span>Volver a explorar</span>
+      </a>
+      <a class="brand" href="index.html">
+        <img src="img/logo.png" alt="GSite" class="brand-logo-img">
+        <span class="brand-name">GSite</span>
+      </a>
+    </div>
+
+    <div class="header-actions">
+      <button class="pill-btn" type="button" onclick="shareQuinta()"><span class="ms">share</span><span id="shareLabel">Compartir</span></button>
+      <button class="pill-btn fav" type="button" id="dFavBtn" onclick="toggleDetailFav()"><span class="ms" id="dFavIcon">favorite</span><span id="dFavText">Guardar</span></button>
+    </div>
+  </div>
+</header>
+
+<main class="detail-view" style="padding-top:calc(var(--header-h) + 1rem); padding-bottom:9rem;">
+  <div class="container detail-wrap">
+    <div class="crumbs-row">
+      <nav class="crumbs" id="dCrumbs" aria-label="Breadcrumb" style="display:flex;"></nav>
+    </div>
+
+    <div class="detail-head">
+      <h1 id="dTitle">Cargando quinta...</h1>
+      <div class="head-meta" id="dMeta"></div>
+    </div>
+
+    <div class="gallery-wrap">
+      <div class="gallery" id="dGallery"></div>
+      <span class="g-counter" id="gCounter"></span>
+      <button class="g-all" type="button" onclick="openLightbox(0)"><span class="ms">grid_view</span><span id="gAllLabel">Ver fotos</span></button>
+    </div>
+
+    <div class="detail-stack">
+      <section class="d-card" id="dHostCard"></section>
+
+      <section class="d-card">
+        <h2>Acerca de la quinta</h2>
+        <p class="prose" id="dAbout"></p>
+      </section>
+
+      <section class="d-card">
+        <div class="d-card-head"><h2>Lo que ofrece este espacio</h2><span class="count-badge" id="amenCount"></span></div>
+        <div class="amen-grid" id="dAmenities"></div>
+      </section>
+
+      <section class="d-card" id="disponibilidad">
+        <div class="d-card-head">
+          <div>
+            <h2>Disponibilidad de fechas</h2>
+            <p class="sub">Haz clic en un día disponible para abrir la reserva.</p>
+          </div>
+          <div class="legend">
+            <span><i style="background:var(--primary-container)"></i>Disponible</span>
+            <span><i style="background:#cbd5e1"></i>Ocupado</span>
+          </div>
+        </div>
+        <div class="cal">
+          <div class="cal-head">
+            <strong id="calTitle"></strong>
+            <div class="cal-nav">
+              <button type="button" id="calPrev" onclick="calMove(-1)" aria-label="Mes anterior"><span class="ms">chevron_left</span></button>
+              <button type="button" onclick="calMove(1)" aria-label="Mes siguiente"><span class="ms">chevron_right</span></button>
+            </div>
+          </div>
+          <div class="cal-dow"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+      </section>
+
+      <section class="d-card">
+        <div class="d-card-head">
+          <div><h2>Ubicación y accesos</h2><p class="sub" id="dLocSub"></p></div>
+          <a class="map-link" id="dMapLink" href="#" target="_blank" rel="noopener"><span>Abrir en Google Maps</span><span class="ms" style="font-size:16px">open_in_new</span></a>
+        </div>
+        <div class="map-embed" id="dMap"></div>
+        <div class="tiles" id="dLocTiles"></div>
+      </section>
+
+      <section class="d-card">
+        <h2>Reglas del espacio en <span id="rulesCity"></span></h2>
+        <div class="rules" id="dRules"></div>
+        <p class="rules-note">Reglas municipales y del predio — respeta horarios y sonido para garantizar tu evento sin contratiempos.</p>
+      </section>
+    </div>
+  </div>
+
+  <!-- STICKY BOTTOM BAR -->
+  <aside class="sticky-bar" aria-label="Reserva">
+    <div class="sticky-inner">
+      <div class="sb-price">
+        <strong id="sbPrice"></strong>
+        <small id="sbSub"></small>
+        <div class="sb-extra">
+          <span class="sb-badge amber" id="sbRating"></span>
+          <span class="sb-badge green" id="sbDeposit"></span>
+        </div>
+      </div>
+      <button class="sb-cta" id="openDrawerBtn" type="button" onclick="openDrawer()"><span id="sbCtaLabel">Iniciar reserva</span><span class="ms">calendar_month</span></button>
+    </div>
+  </aside>
+</main>
+
+<!-- ===================== SLIDE-OVER DRAWER (reserva) ===================== -->
+<div class="overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true">
+  <div class="drawer-head">
+    <div>
+      <h3 id="drawerTitle">Configura tu evento</h3>
+      <p class="drawer-sub" id="drawerSub"></p>
+    </div>
+    <button class="icon-btn" id="drawerClose" type="button" onclick="closeDrawer()" aria-label="Cerrar"><span class="ms">close</span></button>
+  </div>
+
+  <div class="drawer-body" id="drawerBody">
+    <div class="form-view" id="drawerFormView">
+      <div class="form-block">
+        <div class="dr-label-row"><span class="form-title">Fecha del evento</span><span class="dr-badge muted" id="dDateBadge">Sin fecha</span></div>
+        <div class="cal-inline">
+          <p class="dr-date-label" id="dDateLabel">Elige una fecha</p>
+          <input type="hidden" id="eventDate">
+        </div>
+      </div>
+
+      <div class="form-block">
+        <div class="dr-label-row"><span class="form-title">Horario de uso</span></div>
+        <div class="time-grid">
+          <div class="field">
+            <label for="checkinTime">Hora de entrada</label>
+            <select id="checkinTime">
+              <option value="">Elige hora</option>
+              <option value="09:00">9:00 am</option><option value="10:00">10:00 am</option><option value="11:00">11:00 am</option>
+              <option value="12:00">12:00 pm</option><option value="13:00">1:00 pm</option><option value="14:00">2:00 pm</option>
+              <option value="15:00">3:00 pm</option><option value="16:00">4:00 pm</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Hora de salida</label>
+            <span class="field-static" id="exitTime">—</span>
+          </div>
+        </div>
+        <div class="note-box" id="scheduleNote"></div>
+      </div>
+
+      <div class="guest-box">
+        <div>
+          <span class="form-title">Invitados</span>
+          <div class="guest-num"><strong id="gNum">20</strong><span>personas</span></div>
+          <small id="gCapNote"></small>
+        </div>
+        <div class="guest-btns">
+          <button class="step-btn" id="gMinus" type="button" onclick="adjustDrawerGuests(-5)" aria-label="Menos invitados"><span class="ms">remove</span></button>
+          <button class="step-btn" id="gPlus" type="button" onclick="adjustDrawerGuests(5)" aria-label="Más invitados"><span class="ms">add</span></button>
+        </div>
+      </div>
+
+      <div class="form-block">
+        <div class="form-title">Tus datos</div>
+        <div class="form-row two">
+          <div class="field"><label for="clientName">Nombre completo</label><input type="text" id="clientName" placeholder="Tu nombre y apellido" autocomplete="name"></div>
+          <div class="field"><label for="clientPhone">Teléfono móvil</label><input type="tel" id="clientPhone" placeholder="10 dígitos (ej. 8711234567)" autocomplete="tel"></div>
+        </div>
+      </div>
+
+      <div class="form-block">
+        <div class="dr-label-row">
+          <span class="form-title">Servicios adicionales opcionales</span>
+          <span class="dr-badge">Listos al llegar</span>
+        </div>
+        <div class="addons-grid" id="addonsList"></div>
+      </div>
+
+      <div class="breakdown show" id="breakdown">
+        <div class="form-title" style="margin-bottom:12px">Resumen del desglose</div>
+        <div class="b-row"><span id="sRentaLbl">Renta de la quinta</span><span id="sRenta"></span></div>
+        <div class="b-row" id="sExtrasRow" style="display:none"><span>Servicios adicionales</span><span id="sExtras">$0 MXN</span></div>
+        <div class="b-row"><span>Invitados</span><span id="sGuests"></span></div>
+        <div class="b-row highlight">
+          <div>
+            <span>Anticipo de apartado (Cobro en línea)</span>
+            <small style="display:block; font-size:11px; color:var(--primary); font-weight:600;">Comisión GSite 10% para bloquear la fecha</small>
+          </div>
+          <strong id="sAnticipo" style="color:var(--primary); font-size:15px;"></strong>
+        </div>
+        <div class="b-row highlight">
+          <div>
+            <span>Saldo a liquidar al anfitrión al llegar</span>
+            <small style="display:block; font-size:11px; color:#047857; font-weight:600;">En efectivo o transferencia directa al abrir</small>
+          </div>
+          <strong id="sResto" style="color:#047857; font-size:15px;"></strong>
+        </div>
+        <div class="b-row total"><span>Total del evento</span><span id="sTotal"></span></div>
+      </div>
+
+      <div class="trust-note">
+        <span class="ms fill">verified_user</span>
+        <div><strong>Fecha bloqueada al instante</strong><p>Nadie más podrá apartar ese día. El dueño de la quinta recibe la notificación automatizada.</p></div>
+      </div>
+
+      <p class="error-msg" id="errorMsg"></p>
+    </div>
+
+    <div class="success" id="drawerSuccess">
+      <div class="check"><span class="ms">check</span></div>
+      <h4>¡Reserva confirmada y fecha bloqueada!</h4>
+      <p style="font-size:13px; color:var(--on-surface-variant); margin-bottom:12px;">El anfitrión recibió la notificación en su correo y portal. Tu fecha queda 100% apartada.</p>
+      
+      <div class="summary" id="successSummary"></div>
+
+      <div class="success-actions" style="display:flex; flex-direction:column; gap:8px; width:100%; margin-top:14px;">
+        <button class="reserve-btn" style="height:48px; font-size:14px;" type="button" onclick="openDigitalPass()"><span class="ms">qr_code_2</span><span>Ver Pase de Acceso Digital</span></button>
+        <a class="pill-btn whatsapp-btn" id="btnWhatsappSuccess" target="_blank" rel="noopener" href="#" style="justify-content:center; padding:12px; text-decoration:none;"><span class="ms">chat</span><span>WhatsApp con el Anfitrión (Opcional)</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-foot">
+    <button class="reserve-btn" id="reserveBtn" type="button" onclick="handleReserve()"><span id="reserveLabel">Apartar fecha</span><span class="ms" id="reserveIcon">lock</span></button>
+    <p class="reserve-note" id="reserveNote">Aparta con solo 10% · Resto en efectivo al llegar</p>
+  </div>
+</aside>
+
+<!-- ===================== MODAL: PASARELA DE PAGO (ANTICIPO / COMISIÓN 10%) ===================== -->
+<div class="modal-overlay" id="paymentModal" onclick="if(event.target===this)closePaymentModal()">
+  <div class="modal-sheet" style="max-width:32rem;" role="dialog" aria-modal="true" aria-labelledby="payTitle">
+    <div class="modal-head">
+      <h3 id="payTitle"><span class="ms">lock</span><span>Pago Seguro de Anticipo</span></h3>
+      <button class="icon-btn" type="button" onclick="closePaymentModal()" aria-label="Cerrar"><span class="ms">close</span></button>
+    </div>
+    <div class="modal-body" style="gap:16px;">
+      <div style="background:var(--surface-low); padding:14px; border-radius:var(--r-2xl); border:1px solid var(--surface-variant);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:13px; color:var(--on-surface-variant); font-weight:600;">Espacio</span>
+          <strong id="payQuintaName" style="font-size:14px; color:var(--on-surface);"></strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:13px; color:var(--on-surface-variant);">Fecha del evento</span>
+          <strong id="payEventDate" style="font-size:13px; color:var(--on-surface);"></strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:13px; color:var(--on-surface-variant);">Total del evento</span>
+          <strong id="payGrandTotal" style="font-size:13px; color:var(--on-surface);"></strong>
+        </div>
+        <div style="border-top:1px dashed var(--outline-variant); padding-top:10px; margin-top:8px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong style="color:var(--primary); font-size:15px; display:block;">Anticipo a pagar hoy (10%)</strong>
+            <small style="color:var(--outline); font-size:11px;">Comisión de apartado GSite</small>
+          </div>
+          <strong id="payDepositAmount" style="color:var(--primary); font-size:20px; font-family:var(--font-display);"></strong>
+        </div>
+        <div style="background:rgba(16,185,129,.1); padding:8px 10px; border-radius:var(--r-lg); margin-top:10px; font-size:12px; color:#065f46; display:flex; align-items:center; gap:6px;">
+          <span class="ms" style="font-size:16px;">info</span>
+          <span>Liquidas el resto (<strong id="payRemainderAmount"></strong>) en efectivo o SPEI al dueño cuando te abra la quinta.</span>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-family:var(--font-display); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--outline); display:block; margin-bottom:8px;">Selecciona método de pago</label>
+        <div class="pay-methods">
+          <div class="pay-method active" id="methodCard" onclick="selectPayMethod('card')">
+            <span class="ms">credit_card</span>
+            <strong>Tarjeta Débito/Crédito</strong>
+            <small>Visa, Mastercard, AMEX</small>
+          </div>
+          <div class="pay-method" id="methodMP" onclick="selectPayMethod('mp')">
+            <span class="ms">account_balance_wallet</span>
+            <div style="display:flex; align-items:center; gap:4px; justify-content:center;">
+              <strong>Mercado Pago</strong>
+              <span class="pay-badge-mp">México</span>
+            </div>
+            <small>Saldo o cuotas con MP</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta Form -->
+      <div id="payFormCard" class="pay-card-box">
+        <div class="field">
+          <label for="cardNumber" style="font-size:12px; font-weight:600; color:var(--on-surface-variant); margin-bottom:4px; display:block;">Número de Tarjeta</label>
+          <div style="position:relative;">
+            <input type="text" id="cardNumber" placeholder="4152 •••• •••• ••••" maxlength="19" autocomplete="cc-number" style="width:100%; height:44px; padding:0 40px 0 12px; border-radius:var(--r-xl); border:1.5px solid var(--surface-variant); font-size:14px; font-family:monospace; background:#fff;">
+            <span class="ms" style="position:absolute; right:12px; top:12px; color:var(--outline); font-size:20px;">credit_card</span>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="field">
+            <label for="cardExp" style="font-size:12px; font-weight:600; color:var(--on-surface-variant); margin-bottom:4px; display:block;">Vencimiento</label>
+            <input type="text" id="cardExp" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp" style="width:100%; height:44px; padding:0 12px; border-radius:var(--r-xl); border:1.5px solid var(--surface-variant); font-size:14px; background:#fff;">
+          </div>
+          <div class="field">
+            <label for="cardCvv" style="font-size:12px; font-weight:600; color:var(--on-surface-variant); margin-bottom:4px; display:block;">CVV</label>
+            <input type="password" id="cardCvv" placeholder="123" maxlength="4" autocomplete="cc-csc" style="width:100%; height:44px; padding:0 12px; border-radius:var(--r-xl); border:1.5px solid var(--surface-variant); font-size:14px; background:#fff;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Mercado Pago View -->
+      <div id="payFormMP" class="pay-card-box" style="display:none; text-align:center; padding:20px;">
+        <div style="width:54px; height:54px; border-radius:50%; background:#e0f2fe; color:#0284c7; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+          <span class="ms" style="font-size:28px;">account_balance_wallet</span>
+        </div>
+        <strong style="display:block; font-size:15px; margin-bottom:4px; color:var(--on-surface);">Paga seguro con Mercado Pago</strong>
+        <p style="font-size:12px; color:var(--on-surface-variant); margin-bottom:12px; line-height:1.4;">Serás redirigido a la pasarela protegida de Mercado Pago México para autorizar el anticipo.</p>
+        <span class="pay-badge-mp" style="padding:4px 12px; font-size:11px;">Protección al comprador 100%</span>
+      </div>
+
+      <div class="pay-secure-note">
+        <span class="ms" style="font-size:16px; color:#047857;">encrypted</span>
+        <span>Pagos encriptados con SSL de 256 bits · Confirmación instantánea</span>
+      </div>
+      <p class="error-msg" id="payErrorMsg" style="margin:0;"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="pill-btn" type="button" onclick="closePaymentModal()">Cancelar</button>
+      <button class="reserve-btn" id="btnSubmitPayment" style="width:auto; padding:12px 24px; height:auto;" type="button" onclick="submitPayment()">
+        <span class="ms">lock</span><span id="btnSubmitPaymentText">Pagar anticipo y confirmar</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL: PASE DIGITAL DE ACCESO ===================== -->
+<div class="modal-overlay" id="passModal" onclick="if(event.target===this)closeDigitalPass()">
+  <div class="modal-sheet" style="max-width:32rem;" role="dialog" aria-modal="true" aria-labelledby="passTitle">
+    <div class="modal-head">
+      <h3 id="passTitle"><span class="ms">confirmation_number</span><span>Pase de Acceso al Evento</span></h3>
+      <button class="icon-btn" type="button" onclick="closeDigitalPass()" aria-label="Cerrar"><span class="ms">close</span></button>
+    </div>
+    <div class="modal-body" id="passContent">
+      <!-- Populated dynamically -->
+    </div>
+    <div class="modal-foot">
+      <button class="pill-btn" type="button" onclick="window.print()"><span class="ms">print</span><span>Imprimir / PDF</span></button>
+      <button class="reserve-btn" style="width:auto; padding:10px 20px; height:auto;" type="button" onclick="closeDigitalPass()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== LIGHTBOX ===================== -->
+<div class="lightbox" id="lightbox" onclick="if(event.target===this)closeLightbox()">
+  <button class="lb-btn lb-close" type="button" onclick="closeLightbox()" aria-label="Cerrar"><span class="ms">close</span></button>
+  <button class="lb-btn lb-prev" type="button" onclick="navLightbox(-1)" aria-label="Anterior"><span class="ms">chevron_left</span></button>
+  <img id="lbImg" src="" alt="">
+  <button class="lb-btn lb-next" type="button" onclick="navLightbox(1)" aria-label="Siguiente"><span class="ms">chevron_right</span></button>
+  <span class="lb-count" id="lbCount"></span>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script src="js/quintas.js"></script>
+<script src="js/detail.js"></script>
+<script>
+  function initPage() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const id = parseInt(params.get("id") || "1", 10);
+      const qList = (typeof quintas !== "undefined" && Array.isArray(quintas)) ? quintas : [];
+      const q = qList.find(x => x.id === id) || qList[0];
+      if (q && typeof renderDetail === "function") {
+        renderDetail(q);
+      }
+    } catch (e) {
+      console.error("Error al inicializar la quinta:", e);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initPage);
+  } else {
+    initPage();
+  }
+</script>
+<script>window.addEventListener("load",function(){setTimeout(function(){var l=document.getElementById("loadingScreen");if(l)l.classList.add("hide");},350);});setTimeout(function(){var l=document.getElementById("loadingScreen");if(l)l.classList.add("hide");},4000);</script>
+</body>
+</html>
