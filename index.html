@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/styles.css?v=3.3">
 </head>
 <body>
 <div id="loadingScreen">
@@ -30,10 +30,10 @@
       <span class="brand-name">GSite</span>
     </a>
     <div class="header-actions">
-      <span class="pill-btn" style="border:none; background:transparent; font-size:13px; color:var(--on-surface-variant); font-weight:600;">
-        <span class="ms" style="color:var(--primary); font-size:16px;">verified</span>
+      <div class="header-tagline">
+        <span class="ms fill">verified</span>
         <span>Renta de Quintas en La Laguna</span>
-      </span>
+      </div>
     </div>
   </div>
 </header>
@@ -47,37 +47,25 @@
     <div class="hero-glow"></div>
     <div class="hero-content">
       <div class="hero-pill"><span class="ms">auto_awesome</span><span>Quintas exclusivas en La Laguna</span></div>
-      <h1>Encuentra la quinta perfecta para tu próximo evento</h1>
+      <h1>Encuentra la quinta <em class="hero-accent">perfecta</em> para tu próximo evento</h1>
       <p class="sub">Albercas, asadores premium y jardines privados para reuniones, cumpleaños y convivios inolvidables por un solo día.</p>
 
       <div class="search-pill">
-        <label class="s-field">
+        <div class="s-field loc-field" id="locField">
           <div class="s-icon"><span class="ms">location_on</span></div>
           <div class="s-text">
             <span class="s-label">¿Dónde?</span>
-            <input class="s-input" id="searchLocation" type="text" placeholder="Ciudad o zona..." autocomplete="off">
+            <input class="s-input" id="searchLocation" type="text" placeholder="Ciudad o zona (ej. Lerdo, Torreón...)" autocomplete="off">
           </div>
-        </label>
+          <!-- Dropdown autocompletador de ubicaciones -->
+          <div class="loc-dropdown" id="locDropdown"></div>
+        </div>
         <div class="s-divider"></div>
         <div class="s-field" id="dateField">
           <div class="s-icon"><span class="ms">calendar_today</span></div>
           <div class="s-text">
             <span class="s-label">Fecha del evento</span>
             <input class="s-input" id="searchDate" type="text" placeholder="Elige una fecha" readonly>
-          </div>
-        </div>
-        <div class="s-divider"></div>
-        <div class="s-field" style="cursor:default; justify-content:space-between;">
-          <div style="display:flex; align-items:center; gap:var(--space-sm); min-width:0;">
-            <div class="s-icon"><span class="ms">groups</span></div>
-            <div class="s-text">
-              <span class="s-label">Invitados</span>
-              <div class="s-guests"><strong id="guestCount">Cualquiera</strong><span id="guestUnit" class="hidden">personas</span></div>
-            </div>
-          </div>
-          <div class="stepper">
-            <button type="button" aria-label="Disminuir invitados" onclick="adjustGuests(-5)"><span class="ms">remove</span></button>
-            <button type="button" aria-label="Aumentar invitados" onclick="adjustGuests(5)"><span class="ms">add</span></button>
           </div>
         </div>
         <div class="s-cta-wrap">
@@ -93,29 +81,24 @@
     </div>
   </section>
 
-  <!-- ===================== CATEGORY BAR ===================== -->
-  <div class="category-bar">
-    <div class="container category-inner">
-      <div class="chips" id="categoryBar"></div>
-      <button class="filter-btn" type="button" onclick="openFilterModal()" title="Filtros avanzados">
-        <span class="ms">tune</span><span class="lbl">Filtros</span>
-        <span class="filter-count" id="filterCount">0</span>
-      </button>
-    </div>
-  </div>
-
   <!-- ===================== LISTINGS ===================== -->
   <section class="container results" id="resultados">
     <div class="results-head">
       <div>
         <div class="results-title">
-          <h2>Espacios con carácter para tu próxima celebración</h2>
-          <span class="count-badge" id="countBadge">0 disponibles</span>
+          <h2>Espacios con <em class="title-accent">carácter</em> para tu próxima celebración</h2>
         </div>
-        <p>Quintas seleccionadas para bodas, XV años y eventos privados.</p>
+        <div class="results-meta">
+          <span class="count-badge" id="countBadge">0 disponibles</span>
+          <p>Quintas seleccionadas para bodas, XV años y eventos privados.</p>
+        </div>
       </div>
       <div class="head-tools">
         <button class="clear-btn" id="clearFiltersBtn" type="button" onclick="clearFilters()">Limpiar búsqueda <span class="ms" style="font-size:16px">close</span></button>
+        <button class="filter-btn" type="button" onclick="openFilterModal()" title="Filtros avanzados">
+          <span class="ms">tune</span><span class="lbl">Filtros</span>
+          <span class="filter-count" id="filterCount">0</span>
+        </button>
         <div class="sort-box">
           <span>Ordenar por:</span>
           <select id="sortSelect" onchange="renderCatalog()">
@@ -137,12 +120,12 @@
         <h3>¿Cómo funciona la renta de quintas por un día?</h3>
         <p>A diferencia del hospedaje nocturno, en GSite reservas la quinta completa en un solo turno de 8 a 15 horas. Perfectas para cumpleaños, carnes asadas, baby showers o albercadas familiares.</p>
         <div class="timeline">
-          <div class="tl-top"><span>Entrada</span><span class="mid">Horas de sol &amp; alberca</span><span>Salida</span></div>
+          <div class="tl-top"><span>Bienvenida</span><span class="mid">Disfrute de tu evento</span><span>Salida</span></div>
           <div class="tl-bar"><i style="width:25%; background:var(--primary-fixed-dim)"></i><i style="width:50%; background:var(--primary-container)"></i><i style="width:25%; background:var(--secondary)"></i></div>
           <div class="tl-legend">
-            <span><b style="background:var(--primary-fixed-dim)"></b> Bienvenida &amp; Asador</span>
-            <span><b style="background:var(--primary-container)"></b> Alberca libre</span>
-            <span><b style="background:var(--secondary)"></b> Música y despedida</span>
+            <span><b style="background:var(--primary-fixed-dim)"></b> Entrega de quinta</span>
+            <span></span>
+            <span><b style="background:var(--secondary)"></b> Despedida</span>
           </div>
         </div>
       </div>
@@ -153,7 +136,6 @@
           <li><span class="ms">done</span><span>Aparta con un anticipo y confirma tu pago con el anfitrión</span></li>
           <li><span class="ms">done</span><span>Reglas claras de horario y música por municipio</span></li>
         </ul>
-        <a href="#">Saber más sobre garantías</a>
       </div>
     </div>
   </section>
@@ -168,7 +150,7 @@
       <div class="foot-col"><h4>Explorar Quintas</h4><a href="#">Con alberca</a><a href="#">Jardines para bodas y fiestas</a><a href="#">Palapas y asadores</a><a href="#">Villas campestres de día</a></div>
       <div class="foot-col"><h4>Zonas en La Laguna</h4><a href="#">Quintas en Torreón</a><a href="#">Quintas en Gómez Palacio</a><a href="#">Quintas en Ciudad Lerdo</a><a href="#">Quintas campestres</a></div>
       <div class="foot-col"><h4>Soporte y Seguridad</h4><a href="#">Centro de ayuda</a><a href="#">Reglas de eventos diurnos</a><a href="#">Opciones de cancelación</a><a href="#">Reportar incidencias</a></div>
-      <div class="foot-col"><h4>Acerca de GSite</h4><a href="#">Nuestra filosofía</a><a href="#">Prensa y novedades</a><a href="#">Términos de servicio</a><a href="#">Aviso de privacidad</a></div>
+      <div class="foot-col"><h4>Acerca de GSite</h4><a href="#">Nuestra filosofía</a><a href="#">Prensa y novedades</a><a href="portal-anfitriones/">Portal de Anfitriones</a><a href="#">Términos y privacidad</a></div>
     </div>
     <div class="foot-trust">
       <span><span class="ms">verified</span> Fecha bloqueada al instante</span>
@@ -193,9 +175,9 @@
       <div class="filter-group">
         <span class="filter-group-title">Precio máximo por evento</span>
         <div class="range-slider-wrap">
-          <input type="range" id="filterPriceRange" min="3000" max="12000" step="500" value="12000" oninput="onPriceSlider(this.value)">
+          <input type="range" id="filterPriceRange" min="1500" max="12000" step="500" value="12000" oninput="onPriceSlider(this.value)">
           <div class="range-labels">
-            <span>$3,000 MXN</span>
+            <span>$1,500 MXN</span>
             <strong id="filterPriceLabel" style="color:var(--primary); font-size:15px;">Hasta $12,000 MXN</strong>
             <span>$12,000 MXN</span>
           </div>
@@ -245,7 +227,7 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 <script src="js/quintas.js"></script>
-<script src="js/app.js"></script>
+<script src="js/app.js?v=3.0"></script>
 <script>window.addEventListener("load",function(){setTimeout(function(){var l=document.getElementById("loadingScreen");if(l)l.classList.add("hide");},350);});setTimeout(function(){var l=document.getElementById("loadingScreen");if(l)l.classList.add("hide");},4000);</script>
 </body>
 </html>

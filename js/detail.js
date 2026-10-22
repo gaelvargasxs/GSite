@@ -199,11 +199,10 @@ function renderHostCard(q) {
           <div class="host-av">${initial}<span class="vb"><span class="ms fill">verified</span></span></div>
           <div>
             <h3>${q.host}</h3>
-            <p>Anfitrión verificado en La Laguna · Respuesta rápida</p>
+            <p>Anfitrión verificado en La Laguna</p>
           </div>
         </div>
         <div class="host-chips">
-          <span class="host-chip"><span class="ms">bolt</span>Responde en ~15 min</span>
           <span class="host-chip"><span class="ms">verified_user</span>Identidad validada</span>
         </div>
       </div>
@@ -237,10 +236,22 @@ function renderHostCard(q) {
 function renderLocation(q) {
   const info = getLocalRules(q.location);
   if ($("dLocSub")) $("dLocSub").textContent = `${q.location} · ${q.reference || "Zona de fácil acceso"}`;
-  if ($("dMapLink")) $("dMapLink").href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q.name + " " + q.location)}`;
+  
+  // Link oficial para abrir en app/web de Google Maps
+  const gmapsQuery = encodeURIComponent(`${q.location}, ${q.reference || "La Laguna"}`);
+  if ($("dMapLink")) $("dMapLink").href = `https://www.google.com/maps/search/?api=1&query=${gmapsQuery}`;
 
-  if ($("dMap")) {
-    $("dMap").innerHTML = `<iframe loading="lazy" title="Ubicación aproximada de ${q.name}" src="https://www.openstreetmap.org/export/embed.html?bbox=${info.lng - 0.08}%2C${info.lat - 0.06}%2C${info.lng + 0.08}%2C${info.lat + 0.06}&layer=mapnik&marker=${info.lat}%2C${info.lng}"></iframe>`;
+  const mapContainer = $("dMap");
+  if (mapContainer) {
+    // Google Maps oficial: diseño familiar, moderno, sin marcas de agua ni librerías pesadas
+    mapContainer.innerHTML = `
+      <iframe
+        loading="lazy"
+        title="Ubicación de ${q.name} en Google Maps"
+        src="https://maps.google.com/maps?q=${info.lat},${info.lng}&hl=es&z=14&t=m&output=embed"
+        style="width:100%; height:100%; border:0; display:block;"
+        allowfullscreen>
+      </iframe>`;
   }
 
   if ($("dLocTiles")) {
@@ -828,13 +839,6 @@ function shareQuinta() {
       setTimeout(() => lbl.textContent = "Compartir", 2000);
     }
   }
-}
-
-function toggleDetailFav() {
-  const icon = $("dFavIcon"), txt = $("dFavText");
-  if (!icon || !txt) return;
-  const isFav = icon.classList.toggle("fill");
-  txt.textContent = isFav ? "Guardado" : "Guardar";
 }
 
 /* ---------------- AYUDANTES GLOBALES Y AUTO-INICIALIZACIÓN ---------------- */

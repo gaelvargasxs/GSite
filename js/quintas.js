@@ -17,7 +17,7 @@ const elegantImgs = [
   "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80"
 ];
 const rusticImgs = [
-  "https://images.unsplash.com/photo-1507038772120-7ffe76778f01?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1200&q=80",
   "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80",
   "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80"
 ];
@@ -60,7 +60,7 @@ const campestreImgs = [
   "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80"
 ];
 const herraduraImgs = [
-  "https://images.unsplash.com/photo-1507038772120-7ffe76778f01?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1200&q=80",
   "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80",
   "https://images.unsplash.com/photo-1541971875076-8f970d573be6?auto=format&fit=crop&w=800&q=80"
 ];

@@ -6,9 +6,6 @@
 
 /* ---------------- ESTADO DEL CATÁLOGO ---------------- */
 let currentQuinta = null;
-let favorites = new Set();
-let activeCategory = "todas";
-let guests = 0; // 0 = cualquiera
 let lastFocus = null;
 let searchDatePicker = null;
 
@@ -18,40 +15,125 @@ let filterCity = "todas";
 let filterMinCap = 0;
 let filterAmenity = new Set();
 
-/* ---------------- BARRA DE CATEGORÍAS ---------------- */
-function renderCategoryBar(){
-  const bar = $("categoryBar");
-  if (!bar) return;
-  bar.innerHTML = categories.map(c => `
-    <button class="chip ${c.key === activeCategory ? "active" : ""}" type="button" onclick="setCategory('${c.key}')">
-      <span class="ms">${c.icon}</span><span>${c.label}</span>
-    </button>`).join("");
+/* ---------------- AUTOCOMPLETADOR DE UBICACIÓN ---------------- */
+const POPULAR_LOCATIONS = [
+  { name: "Lerdo, Durango", query: "Lerdo", sub: "Villa Juárez, Centro y alrededores", icon: "location_city" },
+  { name: "Torreón, Coahuila", query: "Torreón", sub: "Senderos, Viñedos, La Concha", icon: "location_city" },
+  { name: "Gómez Palacio, Dgo.", query: "Gómez Palacio", sub: "Campestre, Chapala, Zona Centro", icon: "location_city" },
+  { name: "Durango, Dgo.", query: "Durango", sub: "Zona de haciendas históricas", icon: "location_city" },
+  { name: "Todas las ubicaciones", query: "", sub: "Ver quintas en toda La Laguna", icon: "travel_explore" }
+];
+
+function normalizeText(s){
+  return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 }
 
-function setCategory(key){
-  activeCategory = key;
-  renderCategoryBar();
-  renderCatalog();
-}
+function initLocationAutocomplete(){
+  const input = $("searchLocation");
+  const dropdown = $("locDropdown");
+  const field = $("locField");
+  if (!input || !dropdown) return;
 
-/* ---------------- BUSCADOR & CONTADOR DE INVITADOS ---------------- */
-function adjustGuests(delta){
-  if (guests === 0) guests = delta > 0 ? 10 : 0;
-  else {
-    guests += delta;
-    if (guests < 10) guests = 0;
-    if (guests > 250) guests = 250;
+  function renderDropdown(filterText){
+    const q = normalizeText(filterText);
+    let items = [];
+
+    if (!q){
+      items = POPULAR_LOCATIONS;
+    } else {
+      // Filtrar ciudades base
+      const matchedBase = POPULAR_LOCATIONS.filter(item => {
+        if (!item.query) return false;
+        return normalizeText(item.name).includes(q) || normalizeText(item.sub).includes(q);
+      });
+
+      // Filtrar también por referencias o nombres de quintas
+      const matchedZones = [];
+      if (typeof quintas !== "undefined" && Array.isArray(quintas)) {
+        quintas.forEach(item => {
+          const locNorm = normalizeText(item.location);
+          const refNorm = normalizeText(item.reference);
+          const nameNorm = normalizeText(item.name);
+          if (refNorm.includes(q) || nameNorm.includes(q)) {
+            const cityName = item.location.split(",")[0].trim();
+            matchedZones.push({
+              name: item.reference ? `${item.reference} (${cityName})` : item.name,
+              query: item.reference || item.name,
+              sub: item.name,
+              icon: "pin_drop"
+            });
+          }
+        });
+      }
+
+      items = [...matchedBase, ...matchedZones.slice(0, 3)];
+    }
+
+    if (items.length === 0){
+      dropdown.innerHTML = `
+        <div class="loc-empty">
+          <span class="ms" style="font-size:24px; color:var(--outline); display:block; margin-bottom:4px;">search_off</span>
+          No encontramos quintas en "<strong>${filterText}</strong>"<br>
+          <small>Prueba con Lerdo, Torreón, Gómez Palacio o Durango.</small>
+        </div>`;
+      dropdown.classList.add("open");
+      return;
+    }
+
+    dropdown.innerHTML = `
+      <div class="loc-dropdown-title">${q ? "Sugerencias de búsqueda" : "Ubicaciones populares en La Laguna"}</div>
+      ${items.map(item => `
+        <button class="loc-item" type="button" data-query="${item.query}" data-label="${item.name}">
+          <div class="loc-item-icon"><span class="ms">${item.icon}</span></div>
+          <div class="loc-item-text">
+            <strong>${item.name}</strong>
+            <small>${item.sub}</small>
+          </div>
+        </button>
+      `).join("")}
+    `;
+    dropdown.classList.add("open");
   }
-  const gc = $("guestCount"), gu = $("guestUnit");
-  if (guests === 0){
-    gc.textContent = "Cualquiera";
-    gu.classList.add("hidden");
-  } else {
-    gc.textContent = guests + "+";
-    gu.classList.remove("hidden");
-  }
-  updateFilterUI();
-  renderCatalog();
+
+  // Abrir al enfocar o hacer clic
+  input.addEventListener("focus", () => renderDropdown(input.value));
+  input.addEventListener("click", (e) => {
+    e.stopPropagation();
+    renderDropdown(input.value);
+  });
+
+  // Filtrar conforme se escribe
+  input.addEventListener("input", () => {
+    renderDropdown(input.value);
+    renderCatalog();
+  });
+
+  // Seleccionar sugerencia
+  dropdown.addEventListener("click", (e) => {
+    const btn = e.target.closest(".loc-item");
+    if (!btn) return;
+    const query = btn.dataset.query;
+    input.value = query;
+    dropdown.classList.remove("open");
+    renderCatalog();
+  });
+
+  // Cerrar al hacer clic fuera
+  document.addEventListener("click", (e) => {
+    if (field && !field.contains(e.target)) {
+      dropdown.classList.remove("open");
+    }
+  });
+
+  // Teclas: Escape para cerrar, Enter para buscar
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      dropdown.classList.remove("open");
+    } else if (e.key === "Enter") {
+      dropdown.classList.remove("open");
+      applyFilters(true);
+    }
+  });
 }
 
 function applyFilters(shouldScroll){
@@ -60,26 +142,15 @@ function applyFilters(shouldScroll){
 }
 
 function clearFilters(){
-  $("searchLocation").value = "";
+  if ($("searchLocation")) $("searchLocation").value = "";
   if (searchDatePicker) searchDatePicker.clear();
-  guests = 0;
-  $("guestCount").textContent = "Cualquiera";
-  $("guestUnit").classList.add("hidden");
-  activeCategory = "todas";
-  filterPriceMax = 12000;
-  filterCity = "todas";
-  filterMinCap = 0;
-  filterAmenity.clear();
-  renderCategoryBar();
-  renderCatalog();
+  resetAdvancedFilters();
 }
 
 function activeFilterCount(){
   let n = 0;
   if ($("searchLocation") && $("searchLocation").value.trim()) n++;
   if ($("searchDate") && $("searchDate").value) n++;
-  if (guests) n++;
-  if (activeCategory !== "todas") n++;
   if (filterPriceMax < 12000) n++;
   if (filterCity !== "todas") n++;
   if (filterMinCap > 0) n++;
@@ -141,7 +212,8 @@ function toggleAmenityFilter(cat, btn){
 function applyAdvancedFilters(){
   closeFilterModal();
   renderCatalog();
-  $("resultados").scrollIntoView({behavior:"smooth", block:"start"});
+  const res = $("resultados");
+  if (res) res.scrollIntoView({behavior:"smooth", block:"start"});
 }
 
 function resetAdvancedFilters(){
@@ -154,20 +226,28 @@ function resetAdvancedFilters(){
     $("filterPriceLabel").textContent = "Hasta $12,000 MXN";
   }
   document.querySelectorAll("#cityChips .f-chip").forEach((b, i) => b.classList.toggle("selected", i === 0));
+  document.querySelectorAll(".filter-chips-grid .f-chip").forEach((b, i) => {
+    if (b.dataset.cap === "0") b.classList.add("selected");
+    else if (b.dataset.cap) b.classList.remove("selected");
+  });
   document.querySelectorAll("#amenityFilterChips .f-chip").forEach(b => b.classList.remove("selected"));
   applyAdvancedFilters();
 }
 
 /* ---------------- FILTRADO Y ORDENAMIENTO ---------------- */
 function getFilteredQuintas(){
-  const loc = $("searchLocation") ? $("searchLocation").value.trim().toLowerCase() : "";
+  const rawLoc = $("searchLocation") ? $("searchLocation").value : "";
+  const loc = normalizeText(rawLoc);
   return quintas.filter(q => {
-    if (activeCategory !== "todas" && !q.cats.includes(activeCategory)) return false;
-    if (loc && !q.location.toLowerCase().includes(loc) && !q.name.toLowerCase().includes(loc)) return false;
-    if (guests && q.capacity < guests) return false;
+    if (loc) {
+      const matchLoc = normalizeText(q.location).includes(loc);
+      const matchName = normalizeText(q.name).includes(loc);
+      const matchRef = normalizeText(q.reference).includes(loc);
+      if (!matchLoc && !matchName && !matchRef) return false;
+    }
     if (q.price > filterPriceMax) return false;
     if (filterMinCap && q.capacity < filterMinCap) return false;
-    if (filterCity !== "todas" && !q.location.toLowerCase().includes(filterCity)) return false;
+    if (filterCity !== "todas" && !normalizeText(q.location).includes(normalizeText(filterCity))) return false;
     if (filterAmenity.size > 0) {
       for (let am of filterAmenity) {
         if (!q.cats.includes(am)) return false;
@@ -185,17 +265,6 @@ function sortQuintas(list){
   else if (s === "capacidad") l.sort((a,b) => b.capacity - a.capacity);
   else l.sort((a,b) => b.reviewCount - a.reviewCount);
   return l;
-}
-
-/* ---------------- FAVORITOS ---------------- */
-function toggleFavorite(id, evt){
-  if (evt) evt.stopPropagation();
-  favorites.has(id) ? favorites.delete(id) : favorites.add(id);
-  document.querySelectorAll(`.fav-btn[data-id="${id}"]`).forEach(b => {
-    const on = favorites.has(id);
-    b.classList.toggle("active", on);
-    b.querySelector(".ms").classList.toggle("fill", on);
-  });
 }
 
 /* ---------------- RENDER DEL CATÁLOGO ---------------- */
@@ -221,7 +290,7 @@ async function renderCatalog(){
   }
 
   grid.innerHTML = list.map(q => `
-    <article class="card" onclick="openDetail(${q.id})">
+    <article class="card" onclick="openDetail(${q.id}, event)">
       <div class="card-media">
         <img id="cardImg-${q.id}" src="${q.images[0]}" alt="${q.name}" data-index="0" loading="lazy">
         ${q.images.length > 1 ? `
@@ -230,11 +299,7 @@ async function renderCatalog(){
           <div class="card-dots">${q.images.map((_, i) => `<span class="dot ${i === 0 ? "active" : ""}"></span>`).join("")}</div>` : ""}
         <div class="card-badges">
           ${q.tag ? `<span class="badge"><span class="ms fill">workspace_premium</span>${q.tag}</span>` : ""}
-          <span class="badge solid">Aparta con ${money(Math.round(q.price * 0.10))} (10%)</span>
         </div>
-        <button class="fav-btn ${favorites.has(q.id) ? "active" : ""}" data-id="${q.id}" type="button" aria-label="Guardar en favoritos" onclick="toggleFavorite(${q.id}, event)">
-          <span class="ms ${favorites.has(q.id) ? "fill" : ""}">favorite</span>
-        </button>
         <div class="card-turno"><span class="ms">wb_sunny</span><span>Turno de ${q.hours} horas</span></div>
       </div>
       <div class="card-body">
@@ -251,31 +316,152 @@ async function renderCatalog(){
         <div class="card-foot">
           <div>
             <div class="price"><strong>${money(q.price)}</strong><span>MXN / evento</span></div>
-            <span class="card-note"><span class="ms">verified</span>Aparta con 10% · Resto al llegar</span>
+            <span class="card-note"><span class="ms">verified</span>Aparta con ${money(Math.round(q.price * 0.10))} (10%) · Resto al llegar</span>
           </div>
-          <button class="btn-detail" type="button" onclick="openDetail(${q.id})">Ver espacio</button>
+          <button class="btn-detail" type="button" onclick="openDetail(${q.id}, event)">Ver espacio</button>
         </div>
       </div>
     </article>`).join("");
+
+  observeCards();
+  initCardSwipes();
 }
 
+let cardObserver = null;
+function observeCards(){
+  const cards = document.querySelectorAll("#catalogGrid .card");
+  if (!cards.length) return;
+
+  if (!("IntersectionObserver" in window)) {
+    cards.forEach(c => c.classList.add("revealed"));
+    return;
+  }
+
+  if (cardObserver) {
+    cardObserver.disconnect();
+  }
+
+  cardObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const card = entry.target;
+        card.classList.add("revealed");
+        observer.unobserve(card);
+      }
+    });
+  }, {
+    root: null,
+    rootMargin: "0px 0px -15px 0px",
+    threshold: 0.04
+  });
+
+  const isMobile = window.innerWidth < 640;
+  cards.forEach((card, index) => {
+    // Escalonado suave y visible tanto en móvil como en desktop
+    const delay = isMobile ? Math.min((index % 4) * 80, 240) : (index % 3) * 70;
+    card.style.transitionDelay = `${delay}ms`;
+    cardObserver.observe(card);
+  });
+}
+
+let lastCardSwipe = 0;
+
 function navCard(e, qId, dir){
-  if (e) e.stopPropagation();
+  if (e && e.stopPropagation) e.stopPropagation();
   const q = quintas.find(x => x.id === qId);
-  if (!q) return;
+  if (!q || !q.images || q.images.length <= 1) return;
   const img = $("cardImg-" + qId);
+  if (!img) return;
+
   let idx = parseInt(img.dataset.index, 10) + dir;
   if (idx < 0) idx = q.images.length - 1;
   if (idx >= q.images.length) idx = 0;
   img.dataset.index = idx;
+
+  // Animación de deslizamiento suave entre fotos
+  img.classList.remove("slide-left", "slide-right");
+  void img.offsetWidth; // Forzar reflow para reiniciar animación
+  img.classList.add(dir > 0 ? "slide-left" : "slide-right");
   img.src = q.images[idx];
+
+  // Pre-cargar la siguiente foto para que deslice al instante
+  const nextIdx = (idx + 1) % q.images.length;
+  if (q.images[nextIdx]) {
+    const pre = new Image();
+    pre.src = q.images[nextIdx];
+  }
 
   // Dots
   const dots = img.parentElement.querySelectorAll(".card-dots .dot");
   dots.forEach((d, i) => d.classList.toggle("active", i === idx));
 }
 
-function openDetail(id){
+function initCardSwipes() {
+  const cards = document.querySelectorAll("#catalogGrid .card");
+  cards.forEach(card => {
+    const media = card.querySelector(".card-media");
+    if (!media || media._swipeInitialized) return;
+    media._swipeInitialized = true;
+
+    const img = media.querySelector("img[id^='cardImg-']");
+    if (!img) return;
+    const qId = parseInt(img.id.replace("cardImg-", ""), 10);
+    if (!qId) return;
+
+    let startX = 0;
+    let startY = 0;
+    let isTracking = false;
+    let startTime = 0;
+
+    media.addEventListener("touchstart", (e) => {
+      if (e.touches.length !== 1) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      startTime = Date.now();
+      isTracking = true;
+    }, { passive: true });
+
+    media.addEventListener("touchend", (e) => {
+      if (!isTracking) return;
+      isTracking = false;
+      const touch = e.changedTouches[0];
+      if (!touch) return;
+
+      const diffX = touch.clientX - startX;
+      const diffY = touch.clientY - startY;
+      const elapsed = Date.now() - startTime;
+
+      // Swipe válido si es horizontal (más de 30px y supera el desplazamiento vertical)
+      if (Math.abs(diffX) >= 30 && Math.abs(diffX) > Math.abs(diffY) * 1.15 && elapsed < 700) {
+        lastCardSwipe = Date.now();
+        if (diffX < 0) {
+          // Deslizó hacia la izquierda -> Siguiente foto
+          navCard(null, qId, 1);
+        } else {
+          // Deslizó hacia la derecha -> Foto anterior
+          navCard(null, qId, -1);
+        }
+      }
+    }, { passive: true });
+
+    // Bloquear el click residual que el navegador dispara tras el gesto de arrastre
+    media.addEventListener("click", (e) => {
+      if (Date.now() - lastCardSwipe < 450) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+  });
+}
+
+function openDetail(id, e){
+  if (Date.now() - lastCardSwipe < 450) {
+    if (e && e.preventDefault) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    return;
+  }
   window.location.href = `quinta.html?id=${id}`;
 }
 
@@ -301,12 +487,7 @@ function initMarketplace() {
     $("dateField").addEventListener("click", () => searchDatePicker.open());
   }
 
-  const locInput = $("searchLocation");
-  if (locInput) {
-    locInput.addEventListener("keydown", (e) => { if (e.key === "Enter") applyFilters(true); });
-  }
-
-  if ($("categoryBar")) renderCategoryBar();
+  initLocationAutocomplete();
   renderCatalog();
 }
 
